@@ -1,0 +1,7 @@
+[package]
+name = "ripper"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+makemkv-core = { path = "./modules/makemkv-core" }
