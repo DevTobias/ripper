@@ -10,11 +10,11 @@ fn main() {
         return;
     }
 
-    // let disc = read_disc_properties("examples/makemkvcon_movie", &devices[0].path);
-    let disc = read_disc_properties(
-        "/Applications/MakeMKV.app/Contents/MacOS/makemkvcon",
-        &devices[0].path,
-    );
+    let disc = read_disc_properties("examples/makemkvcon_movie", &devices[0].path);
+    // let disc = read_disc_properties(
+    //     "/Applications/MakeMKV.app/Contents/MacOS/makemkvcon",
+    //     &devices[0].path,
+    // );
 
     let json_disc = serde_json::to_string_pretty(&disc.unwrap()).unwrap();
     fs::write("parsed.json", json_disc).expect("written file");
