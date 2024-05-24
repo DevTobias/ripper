@@ -3,7 +3,7 @@ use std::fs;
 use makemkv_core::read_disc_properties;
 
 fn main() {
-    let info = read_disc_properties("./.vscode/info");
+    let info = read_disc_properties("./data/makemkvcon");
     let test = serde_json::to_string_pretty(&info.unwrap()).unwrap();
     fs::write("parsed.json", test).expect("written file");
 
