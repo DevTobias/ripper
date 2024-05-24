@@ -1,9 +1,9 @@
 [workspace]
+resolver = "2"
 members = [
     "services/autoripper",
     "services/makemkv-cli"
 ]
-resolver = "2"
 
 [workspace.dependencies]
 makemkv-core = { path = "libs/makemkv-core" }
