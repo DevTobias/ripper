@@ -97,6 +97,13 @@ pub struct Disc {
     pub titles: Vec<Title>,
 }
 
+#[derive(Debug, Default, Clone, Serialize)]
+pub struct Device {
+    pub name: String,
+    pub device_type: String,
+    pub path: String,
+}
+
 pub enum StreamType {
     Video,
     Audio,

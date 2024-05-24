@@ -7,9 +7,40 @@ use std::{
 mod models;
 mod parser;
 
-pub fn read_disc_properties(command: &str) -> Result<models::Disc, Box<dyn Error>> {
+pub fn detect_devices(command: &str) -> Result<Vec<models::Device>, Box<dyn Error>> {
     let process = Command::new(command)
-        .args(["-r", "info", "dev:/dev/rdisk5"])
+        .args(["-r", "--cache=1", "info", "disc:999"])
+        .stdout(Stdio::piped())
+        .spawn()?;
+
+    let stdout = BufReader::new(process.stdout.ok_or("failed to capture stdout")?);
+
+    let mut devices: Vec<models::Device> = Vec::new();
+
+    for line in stdout.lines() {
+        let columns = parser::parse_csv_line(&line?);
+
+        if columns[0].starts_with("DRV:") {
+            let device_type = columns[4].trim().to_string();
+            let name: String = columns[5].trim().to_string();
+            let path = columns[6].trim().to_string();
+
+            if name.len() > 0 && device_type.len() > 0 && path.len() > 0 {
+                devices.push(models::Device {
+                    name,
+                    device_type,
+                    path,
+                });
+            }
+        }
+    }
+
+    Ok(devices)
+}
+
+pub fn read_disc_properties(command: &str, device: &str) -> Result<models::Disc, Box<dyn Error>> {
+    let process = Command::new(command)
+        .args(["-r", "info", format!("dev:{}", device).as_str()])
         .stdout(Stdio::piped())
         .spawn()?;
 
@@ -21,12 +52,7 @@ pub fn read_disc_properties(command: &str) -> Result<models::Disc, Box<dyn Error
     let mut audio_stream_id: isize = -1;
     let mut subtitle_stream_id: isize = -1;
 
-    // let mut file = File::create("output")?;
-
     for line in stdout.lines() {
-        // let line = line?;
-        // writeln!(file, "{}", &line.clone())?;
-
         let columns = parser::parse_csv_line(&line?);
 
         match columns[0].as_str() {
