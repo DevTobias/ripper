@@ -72,7 +72,7 @@ pub struct Title {
     pub disk_size_bytes: i64,
     pub source_file_name: String,
     pub segments_count: i8,
-    pub segments_map: i32,
+    pub segments_map: String,
     pub output_file_name: String,
     pub metadata_language_code: String,
     pub metadata_language_name: String,

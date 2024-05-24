@@ -21,7 +21,12 @@ pub fn read_disc_properties(command: &str) -> Result<models::Disc, Box<dyn Error
     let mut audio_stream_id: isize = -1;
     let mut subtitle_stream_id: isize = -1;
 
+    // let mut file = File::create("output")?;
+
     for line in stdout.lines() {
+        // let line = line?;
+        // writeln!(file, "{}", &line.clone())?;
+
         let columns = parser::parse_csv_line(&line?);
 
         match columns[0].as_str() {
@@ -61,7 +66,7 @@ pub fn read_disc_properties(command: &str) -> Result<models::Disc, Box<dyn Error
                     11 => disc.titles[id].disk_size_bytes = value.parse()?,
                     16 => disc.titles[id].source_file_name = value,
                     25 => disc.titles[id].segments_count = value.parse()?,
-                    26 => disc.titles[id].segments_map = value.parse()?,
+                    26 => disc.titles[id].segments_map = value,
                     27 => disc.titles[id].output_file_name = value,
                     28 => disc.titles[id].metadata_language_code = value,
                     29 => disc.titles[id].metadata_language_name = value,
