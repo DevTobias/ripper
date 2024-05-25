@@ -1,26 +1,16 @@
-use std::fs::{self};
+use makemkv_core::{detect_devices, Ripper};
+use std::fs;
 
-use makemkv_core::{detect_devices, read_disc_properties};
+#[tokio::main]
+async fn main() {
+    let tmdb_key = std::env::var("TMDB_KEY").unwrap();
 
-fn main() {
-    let devices = detect_devices("examples/makemkvcon_device").unwrap();
+    let devices = detect_devices("../_examples/makemkvcon_device").unwrap();
+    let mut ripper = Ripper::new("../_examples/makemkvcon_movie", &devices[0].path);
 
-    if devices.len() == 0 {
-        println!("No devices found");
-        return;
-    }
+    ripper.read_properties().unwrap();
+    ripper.filter_movie_candidates(Vec::from(["deu", "eng"]), 447365, tmdb_key.as_str()).await.unwrap();
 
-    let disc = read_disc_properties("examples/makemkvcon_movie", &devices[0].path);
-    // let disc = read_disc_properties(
-    //     "/Applications/MakeMKV.app/Contents/MacOS/makemkvcon",
-    //     &devices[0].path,
-    // );
-
-    let json_disc = serde_json::to_string_pretty(&disc.unwrap()).unwrap();
+    let json_disc = serde_json::to_string_pretty(&ripper.disc).unwrap();
     fs::write("parsed.json", json_disc).expect("written file");
-
-    // let start = std::time::Instant::now();
-    // let info = read_disc_properties("/Applications/MakeMKV.app/Contents/MacOS/makemkvcon");
-    // println!("elapsed: {:?} for {:#?}", start.elapsed(), info.unwrap());
-    // println!("elapsed: {:?}", start.elapsed());
 }

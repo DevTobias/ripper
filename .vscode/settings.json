@@ -8,7 +8,7 @@
   "explorer.fileNesting.enabled": true,
   "explorer.fileNesting.expand": false,
   "explorer.fileNesting.patterns": {
-    "Cargo.toml": "Cargo.lock,.gitignore,.editorconfig"
+    "Cargo.toml": "Cargo.lock,.gitignore,.editorconfig,rustfmt.toml"
   },
 
   "files.exclude": {

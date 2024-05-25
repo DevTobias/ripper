@@ -7,3 +7,4 @@ members = [
 
 [workspace.dependencies]
 makemkv-core = { path = "libs/makemkv-core" }
+tmdb-client = { path = "libs/tmdb-client" }

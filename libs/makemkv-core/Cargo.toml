@@ -4,4 +4,5 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+tmdb-client = { workspace = true }
 serde = {version = "1.0.202", features = ["derive"]}
