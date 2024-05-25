@@ -40,14 +40,18 @@ pub fn detect_devices(command: &str) -> Result<Vec<models::Device>, Box<dyn Erro
 pub struct Ripper {
     command: String,
     device: String,
+    langs: Vec<String>,
+    tmdb_key: String,
     pub disc: Option<models::Disc>,
 }
 
 impl Ripper {
-    pub fn new(command: &str, device: &str) -> Self {
+    pub fn new(command: &str, device: &str, langs: Vec<&str>, tmdb_key: &str) -> Self {
         Self {
             command: command.to_string(),
             device: device.to_string(),
+            langs: langs.iter().map(|x| x.to_string()).collect(),
+            tmdb_key: tmdb_key.to_string(),
             disc: None,
         }
     }
@@ -237,8 +241,8 @@ impl Ripper {
         Ok(())
     }
 
-    pub async fn filter_movie_candidates(&mut self, langs: Vec<&str>, tmdb_id: u32, tmdb_key: &str) -> Result<(), Box<dyn Error>> {
-        let movie = TmdbClient::new(tmdb_key).get_movie(tmdb_id).await?;
+    pub async fn filter_movie_candidates(&mut self, tmdb_id: u32) -> Result<(), Box<dyn Error>> {
+        let movie = TmdbClient::new(self.tmdb_key.as_str()).get_movie(tmdb_id).await?;
 
         let filtered_titles = self
             .disc
@@ -251,7 +255,7 @@ impl Ripper {
                     return false;
                 }
 
-                let satisfies_language = title.audio_streams.iter().any(|stream| langs.contains(&stream.lang_code.as_str()));
+                let satisfies_language = title.audio_streams.iter().any(|stream| self.langs.contains(&stream.lang_code));
 
                 if !satisfies_language {
                     return false;
@@ -261,6 +265,48 @@ impl Ripper {
                 let actual_runtime = (movie.runtime * 60) as f32;
 
                 title_runtime >= actual_runtime * 0.9 && title_runtime <= actual_runtime * 1.1
+            })
+            .cloned()
+            .collect::<Vec<_>>();
+
+        self.disc.as_mut().unwrap().titles = filtered_titles;
+
+        Ok(())
+    }
+
+    pub async fn filter_tv_series_candidates(&mut self, tmdb_id: u32, season: u16, episodes: Vec<u16>) -> Result<(), Box<dyn Error>> {
+        let tv_series = TmdbClient::new(self.tmdb_key.as_str()).get_tv_series(tmdb_id).await?;
+
+        let episode_runtimes = tv_series.seasons[(season - 1) as usize]
+            .episodes
+            .iter()
+            .filter(|episode| episodes.contains(&episode.episode_number))
+            .cloned()
+            .map(|episode| (episode.runtime * 60) as f32)
+            .collect::<Vec<_>>();
+
+        let filtered_titles = self
+            .disc
+            .as_ref()
+            .expect("disc not read in yet")
+            .titles
+            .iter()
+            .filter(|title| {
+                if title.audio_streams.len() == 0 {
+                    return false;
+                }
+
+                let satisfies_language = title.audio_streams.iter().any(|stream| self.langs.contains(&stream.lang_code));
+
+                if !satisfies_language {
+                    return false;
+                }
+
+                let title_runtime = title.duration as f32;
+
+                episode_runtimes
+                    .iter()
+                    .any(|runtime| title_runtime >= *runtime * 0.9 && title_runtime <= *runtime * 1.1)
             })
             .cloned()
             .collect::<Vec<_>>();
