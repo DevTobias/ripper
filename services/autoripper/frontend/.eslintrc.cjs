@@ -67,5 +67,6 @@ module.exports = {
     // Dosencourage something, with is stated in the chakra ui documentation and so should be
     // disabled
     '@typescript-eslint/unbound-method': 'off',
+    "no-void": "off",
   },
 };

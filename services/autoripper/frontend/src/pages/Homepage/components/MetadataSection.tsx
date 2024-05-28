@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '$/components/common/ui/select';
 import { useDiscStore } from '$/pages/Homepage/stores/useDiscStore';
@@ -8,7 +9,9 @@ const prettifyDeviceName = (device: string) => {
   return device.replace(/_/g, ' ').toLocaleLowerCase();
 };
 
-export const DeviceSection = () => {
+export const MetadataSection = () => {
+  const { t } = useTranslation();
+
   const { data, isLoading } = useQuery(devicesQuery);
 
   const selectDevice = useDiscStore.useSelectDevice();
@@ -16,10 +19,10 @@ export const DeviceSection = () => {
 
   return (
     <div className='flex flex-col gap-3'>
-      <h2 className='font-medium'>Metadaten</h2>
+      <h2 className='font-medium'>{t('homepage.metadata.title')}</h2>
       <Select disabled={isLoading || !data} onValueChange={selectDevice} defaultValue={selectedDevice}>
         <SelectTrigger className='w-full' isLoading={isLoading}>
-          <SelectValue placeholder='Wähle die gewollte Disc aus' />
+          <SelectValue placeholder={t('homepage.metadata.chooseDisc')} />
         </SelectTrigger>
         <SelectContent>
           {data?.map((device) => (

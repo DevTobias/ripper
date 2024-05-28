@@ -1,11 +1,9 @@
-import { DeviceSection } from '$/pages/Homepage/components/DeviceSection';
+import { MetadataSection } from '$/pages/Homepage/components/MetadataSection';
 
 export const Homepage = () => {
   return (
-    <div className='flex h-screen w-full'>
-      <div className='container p-10'>
-        <DeviceSection />
-      </div>
+    <div className='container p-10'>
+      <MetadataSection />
     </div>
   );
 };

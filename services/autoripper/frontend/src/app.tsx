@@ -1,5 +1,9 @@
 import { Homepage } from '$/pages/Homepage';
 
 export const App = () => {
-  return <Homepage />;
+  return (
+    <div className='flex h-screen w-full'>
+      <Homepage />
+    </div>
+  );
 };
