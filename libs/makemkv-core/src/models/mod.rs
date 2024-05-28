@@ -101,6 +101,7 @@ pub struct Disc {
 #[derive(Debug, Default, Clone, Serialize)]
 pub struct Device {
     pub name: String,
+    #[serde(rename = "type")]
     pub device_type: String,
     pub path: String,
 }

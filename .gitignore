@@ -1,2 +1,9 @@
-/target
 .DS_STORE
+
+# Rust specific
+/target
+ripper_output
+
+# React specific
+node_modules
+dist

@@ -4,7 +4,7 @@ use std::{
     process::{Command, Stdio},
 };
 
-use models::{Device, Disc, Title};
+pub use models::{Device, Disc, Title};
 use tmdb_client::TmdbClient;
 
 mod models;

@@ -1,37 +1,45 @@
+use axum::{
+    extract::State,
+    http::{HeaderValue, Method, StatusCode},
+    response::IntoResponse,
+    routing::get,
+    Json, Router,
+};
 use makemkv_core::{detect_devices, filter_tv_series_candidates, read_properties, rip_titles};
+use tower_http::{cors::CorsLayer, services::ServeDir};
+
+#[derive(Debug, Clone)]
+struct AppState {
+    command: String,
+}
 
 #[tokio::main]
 async fn main() {
-    /*let tmdb_key: String = std::env::var("TMDB_KEY").unwrap();
+    let state = AppState {
+        // command: "/Applications/MakeMKV.app/Contents/MacOS/makemkvcon".to_string(),
+        command: "../_examples/makemkvcon_device".to_string(),
+    };
 
-    let devices = detect_devices("../_examples/makemkvcon_device").unwrap();
-    let mut reader = DiscReader::new(
-        "../_examples/makemkvcon_movie",
-        &devices[0].path,
-        Vec::from(["deu", "eng"]),
-        tmdb_key.as_str(),
-    );
+    let app = Router::new()
+        .nest_service("/", ServeDir::new("./frontend/dist"))
+        .route("/api/devices", get(get_devices_handler))
+        .layer(
+            CorsLayer::new()
+                .allow_origin("http://localhost:5173".parse::<HeaderValue>().unwrap())
+                .allow_methods([Method::GET]),
+        )
+        .with_state(state);
 
-    reader.read_properties().unwrap();
-    reader.filter_movie_candidates(447365).await.unwrap();
-    // reader.filter_tv_series_candidates(94997, 1, Vec::from([1, 2])).await.unwrap();
-
-    let json_disc = serde_json::to_string_pretty(&reader.disc).unwrap();
-    fs::write("parsed.json", json_disc).expect("written file");
-
-    rip_disc(
-        "/Applications/MakeMKV.app/Contents/MacOS/makemkvcon",
-        &devices[0].path,
-        Vec::from([0]),
-        "./ripper_output",
-        &|step, step_details, progress| println!("{}: {} - {:.2}%", step, step_details, progress * 100.0),
-    )
-    .unwrap();*/
-
-    rip_tv_series().await;
+    let listener = tokio::net::TcpListener::bind("127.0.0.1:3000").await.unwrap();
+    println!("listening on {}", listener.local_addr().unwrap());
+    axum::serve(listener, app).await.unwrap();
 }
 
-async fn rip_tv_series() {
+async fn get_devices_handler(State(state): State<AppState>) -> impl IntoResponse {
+    (StatusCode::OK, Json(detect_devices(&state.command).unwrap()))
+}
+
+async fn _rip_tv_series() {
     let tmdb_key = std::env::var("TMDB_KEY").unwrap();
     let command = "/Applications/MakeMKV.app/Contents/MacOS/makemkvcon";
 

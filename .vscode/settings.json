@@ -4,15 +4,33 @@
   "editor.unicodeHighlight.allowedCharacters": { "️": true },
   "editor.bracketPairColorization.enabled": true,
   "editor.guides.bracketPairs": "active",
+  "editor.quickSuggestions": { "strings": "on" },
 
   "explorer.fileNesting.enabled": true,
   "explorer.fileNesting.expand": false,
   "explorer.fileNesting.patterns": {
-    "Cargo.toml": "Cargo.lock,.gitignore,.editorconfig,rustfmt.toml"
+    "Cargo.toml": "Cargo.lock,.gitignore,.editorconfig,rustfmt.toml",
+    "package.json": ".env.dist,.prettierignore,.gitignore,.editorconfig,tsconfig.json,tsconfig.node.json,compose.yml,qodana.yaml,pnpm-lock.yaml,.eslintrc.cjs,.prettierrc.js",
+    "vite.config.ts": "index.html,brunoApiCollection.json,tailwind.config.js,postcss.config.js,components.json",
+    "main.tsx": "reset.d.ts,env.d.ts,vite-env.d.ts",
+    "*.tsx": ""
   },
 
   "files.exclude": {
-    "**/target": true
+    "**/target": true,
+    "**/package-lock.json": true,
+    "**/node_modules": true,
+    "**/vite-env.d.ts": false
+  },
+
+  "typescript.enablePromptUseWorkspaceTsdk": true,
+  "typescript.preferences.importModuleSpecifier": "non-relative",
+  "eslint.validate": ["javascript", "typescript", "typescriptreact", "javascriptreact"],
+  "eslint.probe": ["javascript", "typescript", "typescriptreact", "javascriptreact"],
+  "eslint.workingDirectories": ["services/autoripper/frontend"],
+
+  "files.associations": {
+    "*.css": "tailwindcss"
   },
 
   "[json][jsonc][html]": {
@@ -20,5 +38,8 @@
   },
   "[rust]": {
     "editor.defaultFormatter": "rust-lang.rust-analyzer"
+  },
+  "[typescript][javascript]": {
+    "editor.defaultFormatter": "rvest.vs-code-prettier-eslint"
   }
 }

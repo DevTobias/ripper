@@ -1,0 +1,60 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+::-webkit-scrollbar {
+  width: 12px;
+}
+
+::-webkit-scrollbar-track {
+  @apply rounded-full shadow-[inset_0_0_2px_theme(colors.neutral.400)] dark:shadow-[inset_0_0_2px_theme(colors.neutral.800)];
+}
+
+::-webkit-scrollbar-thumb {
+  @apply rounded-full bg-neutral-300 dark:bg-neutral-900;
+  border: 3px solid transparent;
+  background-clip: padding-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-neutral-400 dark:bg-neutral-800;
+}
+
+.hidden-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.hidden-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+@layer base {
+  body {
+    @apply text-base font-light m-0;
+  }
+  h1 {
+    @apply text-4xl leading-[56px] font-normal;
+  }
+  h2 {
+    @apply text-3xl  font-normal;
+  }
+  h3 {
+    @apply text-xl sm:text-2xl font-normal leading-8;
+  }
+  h4 {
+    @apply text-lg;
+  }
+  a {
+    @apply no-underline;
+  }
+  ul {
+    @apply list-disc list-inside;
+  }
+}
+
+@layer utilities {
+  .skeleton {
+    @apply animate-pulse bg-neutral-200;
+  }
+}
