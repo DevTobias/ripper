@@ -1,6 +1,28 @@
 use serde::Serialize;
 
 #[derive(Debug, Default, Clone, Serialize)]
+pub struct Title {
+    pub id: usize,
+    pub name: String,
+    pub chapter_count: i8,
+    pub duration: u32,
+    pub disk_size: String,
+    pub disk_size_bytes: i64,
+    pub source_file_name: String,
+    pub segments_count: i8,
+    pub segments_map: String,
+    pub output_file_name: String,
+    pub metadata_language_code: String,
+    pub metadata_language_name: String,
+    pub tree_info: String,
+    pub panel_title: String,
+    pub order_weight: i32,
+    pub video_stream: VideoStream,
+    pub audio_streams: Vec<AudioStream>,
+    pub subtitle_streams: Vec<SubtitleStream>,
+}
+
+#[derive(Debug, Default, Clone, Serialize)]
 pub struct VideoStream {
     pub stream_type: String,
     pub codec_id: String,
@@ -64,27 +86,6 @@ pub struct SubtitleStream {
 }
 
 #[derive(Debug, Default, Clone, Serialize)]
-pub struct Title {
-    pub name: String,
-    pub chapter_count: i8,
-    pub duration: u32,
-    pub disk_size: String,
-    pub disk_size_bytes: i64,
-    pub source_file_name: String,
-    pub segments_count: i8,
-    pub segments_map: String,
-    pub output_file_name: String,
-    pub metadata_language_code: String,
-    pub metadata_language_name: String,
-    pub tree_info: String,
-    pub panel_title: String,
-    pub order_weight: i32,
-    pub video_stream: VideoStream,
-    pub audio_streams: Vec<AudioStream>,
-    pub subtitle_streams: Vec<SubtitleStream>,
-}
-
-#[derive(Debug, Default, Clone, Serialize)]
 pub struct Disc {
     pub disc_type: String,
     pub name: String,
@@ -102,10 +103,4 @@ pub struct Device {
     pub name: String,
     pub device_type: String,
     pub path: String,
-}
-
-pub enum StreamType {
-    Video,
-    Audio,
-    Subtitle,
 }
