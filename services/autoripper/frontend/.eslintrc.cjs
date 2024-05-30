@@ -68,5 +68,6 @@ module.exports = {
     // disabled
     '@typescript-eslint/unbound-method': 'off',
     "no-void": "off",
+    "jsx-a11y/no-autofocus": "off",
   },
 };

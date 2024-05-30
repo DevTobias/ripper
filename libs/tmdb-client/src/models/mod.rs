@@ -1,5 +1,7 @@
 use serde::Deserialize;
 
+pub mod search;
+
 #[derive(Deserialize, Debug)]
 pub struct Movie {
     pub id: u32,

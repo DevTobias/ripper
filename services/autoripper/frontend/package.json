@@ -4,14 +4,16 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --host",
     "build": "tsc && vite build"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.4.2",
+    "@radix-ui/react-dialog": "^1.0.5",
     "@radix-ui/react-label": "^2.0.2",
     "@radix-ui/react-select": "^2.0.0",
     "@radix-ui/react-slot": "^1.0.2",
+    "@radix-ui/react-tabs": "^1.0.4",
     "@tanstack/react-query": "^5.40.0",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
@@ -22,6 +24,7 @@
     "react-hook-form": "^7.51.5",
     "react-i18next": "^14.1.2",
     "tailwind-merge": "^2.3.0",
+    "vaul": "^0.9.1",
     "zod": "^3.23.8"
   },
   "devDependencies": {

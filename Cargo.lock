@@ -891,6 +891,7 @@ version = "0.1.0"
 dependencies = [
  "axum",
  "makemkv-core",
+ "serde",
  "serde_json",
  "tmdb-client",
  "tokio",
