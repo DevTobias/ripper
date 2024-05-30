@@ -10,20 +10,35 @@ import { MediaSelection } from '$/pages/Homepage/components/MetadataForm/compone
 
 import type { UseFormReturn } from 'react-hook-form';
 
-const formSchema = z.object({
-  device: z.string().min(1, { message: 'formErrors.required' }),
-  type: z.enum(['movie', 'tv_show']),
-  selectedMedia: z.object({
-    id: z.number(),
-    title: z.string(),
-    description: z.string(),
-    popularity: z.number(),
-    originalLanguage: z.string(),
-    posterPath: z.string().nullable(),
-    voteAverage: z.number(),
-    releaseDate: z.date(),
-  }),
-});
+const formSchema = z
+  .object({
+    device: z.string().min(1, { message: 'formErrors.required' }),
+    type: z.enum(['movie', 'tv_show']),
+    selectedMedia: z.object(
+      {
+        id: z.number(),
+        title: z.string(),
+        description: z.string(),
+        popularity: z.number(),
+        originalLanguage: z.string(),
+        posterPath: z.string().nullable(),
+        voteAverage: z.number(),
+        releaseDate: z.date(),
+      },
+      { required_error: 'formErrors.required' }
+    ),
+    selectedSeason: z.number(),
+    selectedEpisodes: z.array(z.number()),
+  })
+  .superRefine((data, ctx) => {
+    if (data.type === 'tv_show' && data.selectedEpisodes.length === 0) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'formErrors.minLength',
+        path: ['selectedEpisodes'],
+      });
+    }
+  });
 
 export type MetadataFormControl = UseFormReturn<z.infer<typeof formSchema>>;
 
@@ -32,7 +47,7 @@ export const MetadataForm = () => {
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: { device: '', type: 'movie' },
+    defaultValues: { device: '', type: 'movie', selectedSeason: 1, selectedEpisodes: [] },
   });
 
   const onSubmit = (values: z.infer<typeof formSchema>) => {

@@ -315,7 +315,7 @@ pub async fn filter_tv_series_candidates(disc: Disc, langs: Vec<&str>, season: u
         .iter()
         .filter(|episode| episodes.contains(&episode.episode_number))
         .cloned()
-        .map(|episode| (episode.runtime * 60) as f32)
+        .map(|episode| ((episode.runtime.unwrap_or(0)) * 60) as f32)
         .collect::<Vec<_>>();
 
     let filtered_titles = disc

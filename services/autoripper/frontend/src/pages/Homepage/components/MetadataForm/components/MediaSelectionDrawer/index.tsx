@@ -13,7 +13,7 @@ interface Props {
 
 export const MediaSelectionDrawer: FC<Props> = ({ type, onMediaSelect, children }) => {
   const [query, setQuery] = useState('');
-  const debouncedQuery = useDebouncedState(query, '', 500);
+  const [debouncedQuery, overrideDebouncedQuery] = useDebouncedState(query, '', 500);
 
   const movieQuery = useQuery(
     searchMovieQuery({ query: debouncedQuery, lang: 'de-DE', enabled: type === 'movie' && debouncedQuery.length >= 3 })
@@ -23,7 +23,10 @@ export const MediaSelectionDrawer: FC<Props> = ({ type, onMediaSelect, children 
     searchTvShowQuery({ query: debouncedQuery, lang: 'de-DE', enabled: type === 'tv_show' && debouncedQuery.length >= 3 })
   );
 
-  useEffect(() => setQuery(''), [type]);
+  useEffect(() => {
+    setQuery('');
+    overrideDebouncedQuery('');
+  }, [overrideDebouncedQuery, type]);
 
   return (
     <MediaDrawerWrapper

@@ -1,7 +1,8 @@
 export const de = {
   translation: {
     formErrors: {
-      required: 'wird benötigt',
+      required: 'Wird benötigt',
+      minLength: 'Mindestens ein Element benötigt',
     },
     homepage: {
       metadata: {
@@ -20,6 +21,8 @@ export const de = {
           placeholder: 'Name',
           description: 'Der Name wird benötigt, um das Hauptfeature der DVD oder Blu-ray genau ermitteln zu können.',
           noResults: 'Keine Ergebnisse gefunden.',
+          episodeSelection: 'Auswahl der Episoden',
+          seasonSelection: 'Auswahl der Staffel',
         },
       },
     },

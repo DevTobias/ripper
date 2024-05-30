@@ -32,6 +32,8 @@ export const fetcher = async <T>(url: string, payload: FetcherPayload<T>): Promi
     credentials: includeCredentials ? 'include' : 'omit',
   });
 
+  // await new Promise((resolve) => setTimeout(resolve, 1000));
+
   if (response.status !== 200) {
     logError([msg, response.status, await response.text()]);
     throw new Error(msg);

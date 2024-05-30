@@ -6,6 +6,7 @@ import { Button } from '$/components/common/ui/button';
 import { FormField } from '$/components/common/ui/form';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '$/components/common/ui/tabs';
 import { MovieSelection } from '$/pages/Homepage/components/MetadataForm/components/MediaSelection/components/MovieSelection';
+import { SeriesSelection } from '$/pages/Homepage/components/MetadataForm/components/MediaSelection/components/SeriesSelection';
 import { MediaSelectionDrawer } from '$/pages/Homepage/components/MetadataForm/components/MediaSelectionDrawer';
 
 import type { MetadataFormControl } from '$/pages/Homepage/components/MetadataForm';
@@ -28,6 +29,8 @@ export const MediaSelection: FC<Props> = ({ form }) => {
           onValueChange={(v) => {
             field.onChange(v);
             form.resetField('selectedMedia');
+            form.resetField('selectedSeason');
+            form.resetField('selectedEpisodes');
           }}
         >
           <div className='flex gap-3'>
@@ -44,7 +47,14 @@ export const MediaSelection: FC<Props> = ({ form }) => {
               control={form.control}
               name='selectedMedia'
               render={({ field: mediaField }) => (
-                <MediaSelectionDrawer type={field.value} onMediaSelect={mediaField.onChange}>
+                <MediaSelectionDrawer
+                  type={field.value}
+                  onMediaSelect={(v) => {
+                    form.resetField('selectedSeason');
+                    form.resetField('selectedEpisodes');
+                    mediaField.onChange(v);
+                  }}
+                >
                   <Button
                     className='aspect-square h-full p-3'
                     type='button'
@@ -61,7 +71,7 @@ export const MediaSelection: FC<Props> = ({ form }) => {
             <MovieSelection form={form} />
           </TabsContent>
           <TabsContent value='tv_show'>
-            <MovieSelection form={form} />
+            <SeriesSelection form={form} />
           </TabsContent>
         </Tabs>
       )}

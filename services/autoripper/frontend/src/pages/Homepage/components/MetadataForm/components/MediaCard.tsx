@@ -1,18 +1,25 @@
 import { ImageOff } from 'lucide-react';
 import { FC } from 'react';
 
+import { cn } from '$/lib/utils';
 import { SearchResultItem } from '$/services/metadata';
 
 interface Props {
   item: SearchResultItem;
+  isDisabled?: boolean;
   onClick?: () => void;
 }
 
-export const MediaCard: FC<Props> = ({ item, onClick }) => {
+export const MediaCard: FC<Props> = ({ item, isDisabled = false, onClick }) => {
   return (
     <button
-      className='flex items-center overflow-hidden rounded-md border text-left shadow-sm transition-colors hover:bg-slate-100'
-      onClick={onClick}
+      className={cn(
+        'flex items-center overflow-hidden rounded-md border text-left shadow-sm',
+        !isDisabled && 'transition-colors hover:bg-slate-100'
+      )}
+      type='button'
+      onClick={!isDisabled ? onClick : undefined}
+      disabled={isDisabled}
     >
       <div className='aspect-[2/3] h-[90px] border-r'>
         {item.posterPath === null && (

@@ -11,5 +11,5 @@ interface Props {
 export const MovieSelection: FC<Props> = ({ form }) => {
   const selectedMedia = form.watch('selectedMedia');
 
-  return <div>{selectedMedia && <MediaCard item={selectedMedia} />}</div>;
+  return <div>{selectedMedia && <MediaCard item={selectedMedia} isDisabled />}</div>;
 };
