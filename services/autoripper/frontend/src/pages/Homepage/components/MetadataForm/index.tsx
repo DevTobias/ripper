@@ -1,71 +1,58 @@
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
+import { useShallow } from 'zustand/react/shallow';
 
 import { Button } from '$/components/common/ui/button';
+import { Dialog, DialogHeader, DialogTrigger, DialogContent, DialogTitle } from '$/components/common/ui/dialog';
 import { Form } from '$/components/common/ui/form';
 import { DeviceSelection } from '$/pages/Homepage/components/MetadataForm/components/DeviceSelection';
 import { MediaSelection } from '$/pages/Homepage/components/MetadataForm/components/MediaSelection';
+import { MetadataButton } from '$/pages/Homepage/components/MetadataForm/components/MetadataButton';
+import { MetadataFormValues, metadataFormSchema, useMediaStore } from '$/pages/Homepage/stores/useMediaStore';
 
 import type { UseFormReturn } from 'react-hook-form';
 
-const formSchema = z
-  .object({
-    device: z.string().min(1, { message: 'formErrors.required' }),
-    type: z.enum(['movie', 'tv_show']),
-    selectedMedia: z.object(
-      {
-        id: z.number(),
-        title: z.string(),
-        description: z.string(),
-        popularity: z.number(),
-        originalLanguage: z.string(),
-        posterPath: z.string().nullable(),
-        voteAverage: z.number(),
-        releaseDate: z.date(),
-      },
-      { required_error: 'formErrors.required' }
-    ),
-    selectedSeason: z.number(),
-    selectedEpisodes: z.array(z.number()),
-  })
-  .superRefine((data, ctx) => {
-    if (data.type === 'tv_show' && data.selectedEpisodes.length === 0) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: 'formErrors.minLength',
-        path: ['selectedEpisodes'],
-      });
-    }
-  });
-
-export type MetadataFormControl = UseFormReturn<z.infer<typeof formSchema>>;
+export type MetadataFormControl = UseFormReturn<MetadataFormValues>;
 
 export const MetadataForm = () => {
   const { t } = useTranslation();
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  const setMetadata = useMediaStore(useShallow((state) => state.setMetadata));
+  const [open, setOpen] = useState(false);
+
+  const form = useForm<z.infer<typeof metadataFormSchema>>({
+    resolver: zodResolver(metadataFormSchema),
     defaultValues: { device: '', type: 'movie', selectedSeason: 1, selectedEpisodes: [] },
   });
 
-  const onSubmit = (values: z.infer<typeof formSchema>) => {
-    console.log('submitting', values);
+  const onSubmit = (values: MetadataFormValues) => {
+    setMetadata(values);
+    setOpen(false);
   };
 
   return (
-    <div className='flex flex-col gap-3'>
-      <h2 className='mb-4 font-medium'>{t('homepage.metadata.title')}</h2>
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-8'>
-          <DeviceSelection form={form} />
-          <MediaSelection form={form} />
-          <Button type='submit' className='w-full'>
-            {t('homepage.metadata.saveMetadata')}
-          </Button>
-        </form>
-      </Form>
-    </div>
+    <Dialog open={open} onOpenChange={setOpen} modal={false}>
+      <DialogTrigger asChild>
+        <MetadataButton />
+      </DialogTrigger>
+      <DialogContent className='flex size-full max-w-full flex-col justify-start gap-16'>
+        <DialogHeader>
+          <DialogTitle>{t('homepage.metadata.title')}</DialogTitle>
+        </DialogHeader>
+
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-8'>
+            <DeviceSelection form={form} />
+            <MediaSelection form={form} />
+            <Button type='submit' className='w-full'>
+              {t('homepage.metadata.saveMetadata')}
+            </Button>
+          </form>
+        </Form>
+      </DialogContent>
+    </Dialog>
   );
 };

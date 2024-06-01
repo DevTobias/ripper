@@ -24,7 +24,8 @@ export const random = (min: number, max: number) => {
 
 export const randomText = (seed: number, min: number, max: number) => {
   const length = randomRange(seed, min, max);
+
   return repeat(length)
-    .map(() => (random(0, 100) < 25 ? 'A ' : 'A'))
+    .map(() => (randomRange(seed, 0, 100) < 25 ? 'A ' : 'A'))
     .join('');
 };

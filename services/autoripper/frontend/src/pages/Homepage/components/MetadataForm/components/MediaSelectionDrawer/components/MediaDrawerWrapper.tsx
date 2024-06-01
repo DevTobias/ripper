@@ -72,7 +72,7 @@ export const MediaDrawerWrapper: FC<Props> = ({
                 .slice(0, 5)
                 .map((media) => (
                   <DrawerClose asChild key={media.id}>
-                    <MediaCard item={media} onClick={() => onMediaSelect(media)} />
+                    <MediaCard item={media} mediaType={type} onClick={() => onMediaSelect(media)} />
                   </DrawerClose>
                 ))}
           </div>

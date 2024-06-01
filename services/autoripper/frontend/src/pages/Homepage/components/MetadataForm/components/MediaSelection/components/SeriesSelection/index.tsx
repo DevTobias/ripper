@@ -24,7 +24,7 @@ export const SeriesSelection: FC<Props> = ({ form }) => {
     <div className='flex flex-col gap-4'>
       {selectedMedia && (
         <>
-          <MediaCard item={selectedMedia} isDisabled />
+          <MediaCard item={selectedMedia} mediaType='tv_show' disabled />
 
           <SeasonSelection
             form={form}

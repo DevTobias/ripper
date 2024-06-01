@@ -67,10 +67,10 @@ export const MediaSelection: FC<Props> = ({ form }) => {
             />
           </div>
 
-          <TabsContent value='movie'>
+          <TabsContent value='movie' tabIndex={-1}>
             <MovieSelection form={form} />
           </TabsContent>
-          <TabsContent value='tv_show'>
+          <TabsContent value='tv_show' tabIndex={-1}>
             <SeriesSelection form={form} />
           </TabsContent>
         </Tabs>

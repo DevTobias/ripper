@@ -6,8 +6,9 @@ export const de = {
     },
     homepage: {
       metadata: {
-        title: 'Backup Informationen',
+        title: 'Medien Informationen',
         saveMetadata: 'Metadaten speichern',
+        selectMetadata: 'Wähle die Metadaten für das Medium aus',
         device: {
           label: 'Abspielgerät für optische Datenträger',
           placeholder: 'Wähle das entsprechende Gerät aus',
