@@ -1,5 +1,6 @@
 export const BASE_URL = 'http://localhost:3000/api';
 export const DEVICE_ENDPOINT = `${BASE_URL}/devices`;
+export const ENCODING_PRESETS_ENDPOINT = `${BASE_URL}/encoding-presets`;
 export const SEARCH_MOVIE_ENDPOINT = `${BASE_URL}/tmdb/search/movie`;
 export const SEARCH_SERIES_ENDPOINT = `${BASE_URL}/tmdb/search/tv`;
 export const SERIES_DETAILS_ENDPOINT = `${BASE_URL}/tmdb/tv`;
@@ -11,4 +12,5 @@ export const endpoints = {
   SEARCH_SERIES_ENDPOINT,
   SERIES_DETAILS_ENDPOINT,
   MOVIE_DETAILS_ENDPOINT,
+  ENCODING_PRESETS_ENDPOINT,
 };

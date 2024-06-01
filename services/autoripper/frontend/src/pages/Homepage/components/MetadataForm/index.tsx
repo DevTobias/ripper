@@ -8,7 +8,6 @@ import { useShallow } from 'zustand/react/shallow';
 import { Button } from '$/components/common/ui/button';
 import { Dialog, DialogHeader, DialogTrigger, DialogContent, DialogTitle } from '$/components/common/ui/dialog';
 import { Form } from '$/components/common/ui/form';
-import { DeviceSelection } from '$/pages/Homepage/components/MetadataForm/components/DeviceSelection';
 import { MediaSelection } from '$/pages/Homepage/components/MetadataForm/components/MediaSelection';
 import { MetadataButton } from '$/pages/Homepage/components/MetadataForm/components/MetadataButton';
 import { MetadataFormValues, metadataFormSchema, useMediaStore } from '$/pages/Homepage/stores/useMediaStore';
@@ -25,7 +24,7 @@ export const MetadataForm = () => {
 
   const form = useForm<z.infer<typeof metadataFormSchema>>({
     resolver: zodResolver(metadataFormSchema),
-    defaultValues: { device: '', type: 'movie', selectedSeason: 1, selectedEpisodes: [] },
+    defaultValues: { type: 'movie', selectedSeason: 1, selectedEpisodes: [] },
   });
 
   const onSubmit = (values: MetadataFormValues) => {
@@ -38,14 +37,13 @@ export const MetadataForm = () => {
       <DialogTrigger asChild>
         <MetadataButton />
       </DialogTrigger>
-      <DialogContent className='flex size-full max-w-full flex-col justify-start gap-16'>
+      <DialogContent className='flex size-full max-w-full flex-col justify-center gap-16 px-32'>
         <DialogHeader>
           <DialogTitle>{t('homepage.metadata.title')}</DialogTitle>
         </DialogHeader>
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-8'>
-            <DeviceSelection form={form} />
             <MediaSelection form={form} />
             <Button type='submit' className='w-full'>
               {t('homepage.metadata.saveMetadata')}

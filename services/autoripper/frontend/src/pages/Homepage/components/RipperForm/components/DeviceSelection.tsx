@@ -1,18 +1,16 @@
 import { useQuery } from '@tanstack/react-query';
-import { RefreshCcw } from 'lucide-react';
 import { FC } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { Button } from '$/components/common/ui/button';
-import { FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '$/components/common/ui/form';
+import { FormControl, FormField, FormItem, FormLabel } from '$/components/common/ui/form';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '$/components/common/ui/select';
 import { cn } from '$/lib/utils';
 import { devicesQuery } from '$/services/devices';
 
-import type { MetadataFormControl } from '$/pages/Homepage/components/MetadataForm';
+import type { RipperFormControl } from '$/pages/Homepage/components/RipperForm';
 
 interface Props {
-  form: MetadataFormControl;
+  form: RipperFormControl;
 }
 
 const prettifyDeviceName = (device: string) => {
@@ -21,12 +19,7 @@ const prettifyDeviceName = (device: string) => {
 
 export const DeviceSelection: FC<Props> = ({ form }) => {
   const { t } = useTranslation();
-  const { data, isLoading, isRefetching, refetch } = useQuery(devicesQuery);
-
-  const reloadDevices = () => {
-    form.resetField('device');
-    void refetch();
-  };
+  const { data, isLoading, isRefetching } = useQuery(devicesQuery);
 
   const loading = isLoading || isRefetching;
 
@@ -34,21 +27,21 @@ export const DeviceSelection: FC<Props> = ({ form }) => {
     <FormField
       control={form.control}
       name='device'
-      render={({ field }) => (
-        <FormItem>
-          <FormLabel className='flex items-center justify-between text-sm'>
-            <span>{t('homepage.metadata.device.label')}</span>
-            <FormMessage isTranslated />
+      render={({ field, fieldState }) => (
+        <FormItem className='w-full'>
+          <FormLabel className='flex items-center gap-1 text-sm'>
+            <span>{t('homepage.device.label')}</span>
           </FormLabel>
           <Select disabled={loading} onValueChange={field.onChange} value={field.value}>
             <FormControl>
               <div className='flex gap-3'>
-                <SelectTrigger className='w-full' isLoading={loading}>
-                  <SelectValue placeholder={t('homepage.metadata.device.placeholder')} />
+                <SelectTrigger
+                  className={cn('w-full', fieldState.error && 'border-red-500')}
+                  isLoading={loading}
+                  ref={field.ref}
+                >
+                  <SelectValue placeholder={t('homepage.device.placeholder')} />
                 </SelectTrigger>
-                <Button className='aspect-square h-full p-3' type='button' onClick={reloadDevices} disabled={loading}>
-                  <RefreshCcw className={cn('size-4', loading && 'animate-spin')} />
-                </Button>
               </div>
             </FormControl>
             <SelectContent>
@@ -61,7 +54,6 @@ export const DeviceSelection: FC<Props> = ({ form }) => {
                 </SelectItem>
               ))}
             </SelectContent>
-            <FormDescription>{t('homepage.metadata.device.description')}</FormDescription>
           </Select>
         </FormItem>
       )}

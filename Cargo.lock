@@ -439,6 +439,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "handbrake-core"
+version = "0.1.0"
+dependencies = [
+ "serde",
+]
+
+[[package]]
 name = "hashbrown"
 version = "0.14.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -890,6 +897,7 @@ name = "ripper"
 version = "0.1.0"
 dependencies = [
  "axum",
+ "handbrake-core",
  "makemkv-core",
  "serde",
  "serde_json",

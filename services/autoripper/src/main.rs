@@ -3,7 +3,7 @@ use axum::{
     routing::{get, post},
     Router,
 };
-use handler::{get_devices_handler, get_movie_details, get_tv_details, search_movie_handler, search_tv_series_handler};
+use handler::{get_devices_handler, get_encoding_profiles_handler, get_movie_details, get_tv_details, search_movie_handler, search_tv_series_handler};
 use makemkv_core::{detect_devices, filter_tv_series_candidates, read_properties, rip_titles};
 use tmdb_client::TmdbClient;
 use tower_http::{cors::CorsLayer, services::ServeDir};
@@ -34,6 +34,7 @@ async fn main() {
     let app = Router::new()
         .nest_service("/", ServeDir::new("./frontend/dist"))
         .route("/api/devices", get(get_devices_handler))
+        .route("/api/encoding-presets", get(get_encoding_profiles_handler))
         .route("/api/tmdb/search/movie", post(search_movie_handler))
         .route("/api/tmdb/search/tv", post(search_tv_series_handler))
         .route("/api/tmdb/movie", post(get_movie_details))

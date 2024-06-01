@@ -5,6 +5,7 @@ edition = "2021"
 
 [dependencies]
 makemkv-core = { workspace = true }
+handbrake-core = { workspace = true }
 tmdb-client = { workspace = true }
 
 serde = {version = "1.0.202", features = ["derive"]}
