@@ -10,6 +10,15 @@ tmdb-client = { workspace = true }
 
 serde = {version = "1.0.202", features = ["derive"]}
 serde_json = "1.0.117"
+
 tokio = { version = "1.37.0", features = ["rt-multi-thread", "macros", "time"] }
-axum = "0.7.5"
-tower-http = { version = "0.5.2", features = ["fs", "cors"] }
+
+tower = { version = "0.4.13", features = ["util"] }
+tower-http = { version = "0.5.2", features = ["fs", "trace", "cors"] }
+
+axum = {version = "0.7.5", features = ["ws"]}
+axum-extra = {version = "0.9.3", features = ["typed-header"]}
+headers = "0.4.0"
+
+tracing = "0.1.40"
+tracing-subscriber = { version = "0.3.18", features = ["env-filter"] }

@@ -276,8 +276,8 @@ pub fn read_properties(command: &str, device: &str) -> Result<Disc, Box<dyn Erro
     Ok(disc)
 }
 
-pub async fn filter_movie_candidates(disc: Disc, langs: Vec<&str>, tmdb_id: u32, tmdb_key: &str) -> Result<Disc, Box<dyn Error>> {
-    let movie = TmdbClient::new(tmdb_key).get_movie(tmdb_id).await?;
+pub async fn filter_movie_candidates(disc: Disc, langs: Vec<&str>, tmdb_id: u32, client: &TmdbClient) -> Result<Disc, Box<dyn Error>> {
+    let movie = client.get_movie(tmdb_id).await?;
 
     let filtered_titles: Vec<Title> = disc
         .titles
@@ -307,8 +307,8 @@ pub async fn filter_movie_candidates(disc: Disc, langs: Vec<&str>, tmdb_id: u32,
     Ok(filtered_disc)
 }
 
-pub async fn filter_tv_series_candidates(disc: Disc, langs: Vec<&str>, season: u16, episodes: Vec<u16>, tmdb_id: u32, tmdb_key: &str) -> Result<Disc, Box<dyn Error>> {
-    let tv_series = TmdbClient::new(tmdb_key).get_tv_series(tmdb_id).await?;
+pub async fn filter_tv_series_candidates(disc: Disc, langs: Vec<&str>, season: u16, episodes: Vec<u16>, tmdb_id: u32, client: &TmdbClient) -> Result<Disc, Box<dyn Error>> {
+    let tv_series = client.get_tv_series(tmdb_id).await?;
 
     let episode_runtimes = tv_series.seasons[(season - 1) as usize]
         .episodes

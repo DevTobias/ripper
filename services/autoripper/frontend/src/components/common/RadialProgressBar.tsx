@@ -9,6 +9,7 @@ interface Props {
   ringClassName?: string;
   bgClassName?: string;
   children?: ReactNode;
+  className?: string;
 }
 
 export const RadialProgressBar = ({
@@ -18,13 +19,14 @@ export const RadialProgressBar = ({
   strokeWidth = 10,
   ringClassName = 'text-indigo-500 dark:text-indigo-400',
   bgClassName = 'text-gray-200 dark:text-gray-600',
+  className,
 }: Props) => {
   const radius = size / 2 - 10;
   const circumference = 2 * Math.PI * radius;
   const offset = circumference - (progress / 100) * circumference;
 
   return (
-    <div className='relative w-fit'>
+    <div className={cn('relative w-fit', className)}>
       <svg height={size} width={size} className='block -rotate-90'>
         <circle
           className={bgClassName}
