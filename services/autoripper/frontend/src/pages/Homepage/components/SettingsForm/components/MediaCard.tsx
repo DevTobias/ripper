@@ -22,7 +22,7 @@ export const MediaCard = forwardRef<HTMLButtonElement, ButtonProps & Props>(func
   return (
     <button
       className={cn(
-        'flex items-center overflow-hidden rounded-[4px] border text-left shadow-sm h-[90px]',
+        'flex items-center overflow-hidden rounded-[4px] border text-left h-[90px]',
         !disabled && 'transition-colors hover:bg-slate-100',
         showSeasonAndEpisodes && 'h-[125px]'
       )}

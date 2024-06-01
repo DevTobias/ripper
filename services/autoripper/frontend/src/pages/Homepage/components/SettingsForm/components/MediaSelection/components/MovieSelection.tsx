@@ -1,8 +1,8 @@
 import { FC } from 'react';
 
-import { MediaCard } from '$/pages/Homepage/components/MetadataForm/components/MediaCard';
+import { MediaCard } from '$/pages/Homepage/components/SettingsForm/components/MediaCard';
 
-import type { MetadataFormControl } from '$/pages/Homepage/components/MetadataForm';
+import type { MetadataFormControl } from '$/pages/Homepage/components/SettingsForm';
 
 interface Props {
   form: MetadataFormControl;

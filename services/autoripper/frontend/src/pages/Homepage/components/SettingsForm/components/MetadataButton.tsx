@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useShallow } from 'zustand/react/shallow';
 
 import { Button, ButtonProps } from '$/components/common/ui/button';
-import { MediaCard } from '$/pages/Homepage/components/MetadataForm/components/MediaCard';
+import { MediaCard } from '$/pages/Homepage/components/SettingsForm/components/MediaCard';
 import { useMediaStore } from '$/pages/Homepage/stores/useMediaStore';
 
 export const MetadataButton = forwardRef<HTMLButtonElement, ButtonProps>(function MetadataButton(props, ref) {

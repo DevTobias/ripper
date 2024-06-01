@@ -3,6 +3,8 @@ import { create } from 'zustand';
 
 export const metadataFormSchema = z
   .object({
+    device: z.string().min(1, { message: 'formErrors.required' }),
+    preset: z.string().min(1, { message: 'formErrors.required' }),
     type: z.enum(['movie', 'tv_show']),
     selectedSeason: z.number(),
     selectedEpisodes: z.array(z.number()),
@@ -26,25 +28,16 @@ export const metadataFormSchema = z
     }
   });
 
-export const ripperFormSchema = z.object({
-  device: z.string().min(1, { message: 'formErrors.required' }),
-  preset: z.string().min(1, { message: 'formErrors.required' }),
-});
-
 export type MetadataFormValues = z.infer<typeof metadataFormSchema>;
-export type RipperFormValues = z.infer<typeof ripperFormSchema>;
 
 type State = {
   metadata?: MetadataFormValues;
-  ripperInfo?: RipperFormValues;
 };
 
 type Actions = {
   setMetadata: (mediaInfo: MetadataFormValues) => void;
-  setRipperInfo: (ripperInfo: RipperFormValues) => void;
 };
 
 export const useMediaStore = create<State & Actions>()((set) => ({
   setMetadata: (metadata) => set({ metadata }),
-  setRipperInfo: (ripperInfo) => set({ ripperInfo }),
 }));

@@ -7,10 +7,10 @@ import { cn } from '$/lib/utils';
 import { devicesQuery } from '$/services/devices';
 import { encodingPresetsQuery } from '$/services/presets';
 
-import type { RipperFormControl } from '$/pages/Homepage/components/RipperForm';
+import type { MetadataFormControl } from '$/pages/Homepage/components/SettingsForm';
 
 interface Props {
-  form: RipperFormControl;
+  form: MetadataFormControl;
 }
 
 export const ReloadButton: FC<Props> = ({ form }) => {

@@ -1,21 +1,22 @@
 import { Search } from 'lucide-react';
-import { FC } from 'react';
+import { FC, ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '$/components/common/ui/button';
 import { FormField } from '$/components/common/ui/form';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '$/components/common/ui/tabs';
-import { MovieSelection } from '$/pages/Homepage/components/MetadataForm/components/MediaSelection/components/MovieSelection';
-import { SeriesSelection } from '$/pages/Homepage/components/MetadataForm/components/MediaSelection/components/SeriesSelection';
-import { MediaSelectionDrawer } from '$/pages/Homepage/components/MetadataForm/components/MediaSelectionDrawer';
+import { MovieSelection } from '$/pages/Homepage/components/SettingsForm/components/MediaSelection/components/MovieSelection';
+import { SeriesSelection } from '$/pages/Homepage/components/SettingsForm/components/MediaSelection/components/SeriesSelection';
+import { MediaSelectionDrawer } from '$/pages/Homepage/components/SettingsForm/components/MediaSelectionDrawer';
 
-import type { MetadataFormControl } from '$/pages/Homepage/components/MetadataForm';
+import type { MetadataFormControl } from '$/pages/Homepage/components/SettingsForm';
 
 interface Props {
   form: MetadataFormControl;
+  children?: ReactNode;
 }
 
-export const MediaSelection: FC<Props> = ({ form }) => {
+export const MediaSelection: FC<Props> = ({ children, form }) => {
   const { t } = useTranslation();
 
   return (
@@ -47,22 +48,25 @@ export const MediaSelection: FC<Props> = ({ form }) => {
               control={form.control}
               name='selectedMedia'
               render={({ field: mediaField }) => (
-                <MediaSelectionDrawer
-                  type={field.value}
-                  onMediaSelect={(v) => {
-                    form.resetField('selectedSeason');
-                    form.resetField('selectedEpisodes');
-                    mediaField.onChange(v);
-                  }}
-                >
-                  <Button
-                    className='aspect-square h-full p-3'
-                    type='button'
-                    variant={form.getFieldState('selectedMedia').error ? 'destructive' : 'default'}
+                <div className='flex gap-2'>
+                  <MediaSelectionDrawer
+                    type={field.value}
+                    onMediaSelect={(v) => {
+                      form.resetField('selectedSeason');
+                      form.resetField('selectedEpisodes');
+                      mediaField.onChange(v);
+                    }}
                   >
-                    <Search className='size-4' />
-                  </Button>
-                </MediaSelectionDrawer>
+                    <Button
+                      className='aspect-square h-full p-3'
+                      type='button'
+                      variant={form.getFieldState('selectedMedia').error ? 'destructive' : 'default'}
+                    >
+                      <Search className='size-4' />
+                    </Button>
+                  </MediaSelectionDrawer>
+                  {children}
+                </div>
               )}
             />
           </div>

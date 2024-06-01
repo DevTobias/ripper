@@ -2,11 +2,11 @@ import { FC, ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Drawer, DrawerClose, DrawerContent, DrawerHeader, DrawerTrigger } from '$/components/common/ui/drawer';
-import { FormControl, FormDescription, FormItem, FormLabel, FormMessage } from '$/components/common/ui/form';
+import { FormControl, FormDescription, FormItem, FormLabel, useFormField } from '$/components/common/ui/form';
 import { Input } from '$/components/common/ui/input';
-import { repeat } from '$/lib/utils';
-import { MediaCard } from '$/pages/Homepage/components/MetadataForm/components/MediaCard';
-import { LoadingMediaCard } from '$/pages/Homepage/components/MetadataForm/components/MediaSelectionDrawer/components/LoadingMediaCard';
+import { cn, repeat } from '$/lib/utils';
+import { MediaCard } from '$/pages/Homepage/components/SettingsForm/components/MediaCard';
+import { LoadingMediaCard } from '$/pages/Homepage/components/SettingsForm/components/MediaSelectionDrawer/components/LoadingMediaCard';
 import { SearchResult, SearchResultItem } from '$/services/metadata';
 
 interface Props {
@@ -36,6 +36,8 @@ export const MediaDrawerWrapper: FC<Props> = ({
   const hasNoResults = (!data || data.results.length === 0) && !isActualLoading && debouncedQuery.length >= 3;
   const hasData = data && data.results.length > 0 && !isActualLoading;
 
+  const field = useFormField();
+
   return (
     <Drawer>
       <DrawerTrigger asChild>{children}</DrawerTrigger>
@@ -48,12 +50,12 @@ export const MediaDrawerWrapper: FC<Props> = ({
                   type: type === 'movie' ? t('homepage.metadata.media.movie') : t('homepage.metadata.media.tvShow'),
                 })}
               </span>
-              <FormMessage isTranslated />
             </FormLabel>
 
             <FormControl>
               <Input
                 placeholder={t('homepage.metadata.media.placeholder')}
+                className={cn(field.error && 'border-red-500')}
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 autoFocus

@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { FC, ReactNode, useEffect, useState } from 'react';
 
 import { useDebouncedState } from '$/hooks/useDebouncedState';
-import { MediaDrawerWrapper } from '$/pages/Homepage/components/MetadataForm/components/MediaSelectionDrawer/components/MediaDrawerWrapper';
+import { MediaDrawerWrapper } from '$/pages/Homepage/components/SettingsForm/components/MediaSelectionDrawer/components/MediaDrawerWrapper';
 import { SearchResultItem, searchMovieQuery, searchTvShowQuery } from '$/services/metadata';
 
 interface Props {
