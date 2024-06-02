@@ -1,8 +1,14 @@
+use anyhow::{anyhow, Result};
 use std::{
     error::Error,
     io::{BufRead, BufReader},
     process::{Command, Stdio},
+    sync::{
+        atomic::{AtomicBool, Ordering},
+        Arc, Mutex,
+    },
 };
+use tracing::info;
 
 pub use models::{Device, Disc, Title};
 use tmdb_client::TmdbClient;
@@ -10,11 +16,52 @@ use tmdb_client::TmdbClient;
 mod models;
 mod parser;
 
-pub fn detect_devices(command: &str) -> Result<Vec<Device>, Box<dyn Error>> {
-    let process = Command::new(command).args(["-r", "--cache=1", "info", "disc:999"]).stdout(Stdio::piped()).spawn()?;
+/// Detects devices by executing a given command and parsing its output.
+///
+/// This function spawns a new process to run the specified command with the arguments
+/// `-r --cache=1 info disc:999`. It captures the standard output of this process and
+/// reads it line by line, parsing each line as CSV. If a line represents a device (i.e.,
+/// it starts with "DRV:"), the function extracts the device type, name, and path from
+/// the line. Detected devices are logged and collected into a vector.
+///
+/// # Arguments
+///
+/// * `command` - A string slice that holds the command to be executed (path of makemkvcon).
+/// * `makemkv_mutex` - An `Arc<Mutex<()>>` that ensures mutual exclusion when accessing shared resources.
+///
+/// # Returns
+///
+/// This function returns a `Result` containing a vector of `Device` structs if successful, or an error
+/// if no devices are found or if any other error occurs during execution.
+///
+/// # Errors
+///
+/// This function will return an error if:
+/// - The process cannot be spawned.
+/// - The standard output of the process cannot be captured.
+/// - No devices are detected.
+///
+/// # Example
+///
+/// ```rust
+/// use makemkv_core::{detect_devices};
+/// use std::sync::{Arc, Mutex};
+///
+/// let command = "makemkvcon";
+/// let makemkv_mutex = Arc::new(Mutex::new(()));
+///
+/// match detect_devices(command, makemkv_mutex) {
+///     Ok(devices) => println!("Detected devices: {:?}", devices),
+///     Err(e) => eprintln!("Error detecting devices: {}", e),
+/// }
+/// ```
+pub fn detect_devices(command: &str, makemkv_mutex: Arc<Mutex<()>>) -> Result<Vec<Device>> {
+    let _lock = makemkv_mutex.lock().unwrap();
 
-    let stdout = BufReader::new(process.stdout.ok_or("failed to capture stdout")?);
+    info!("detecting devices with command: {}", command);
 
+    let mut process = Command::new(command).args(["-r", "--cache=1", "info", "disc:999"]).stdout(Stdio::piped()).spawn()?;
+    let stdout = BufReader::new(process.stdout.take().ok_or(anyhow!("failed to capture stdout"))?);
     let mut devices: Vec<Device> = Vec::new();
 
     for line in stdout.lines() {
@@ -26,79 +73,77 @@ pub fn detect_devices(command: &str) -> Result<Vec<Device>, Box<dyn Error>> {
             let path = columns[6].trim().to_string();
 
             if name.len() > 0 && device_type.len() > 0 && path.len() > 0 {
+                info!(name = &name, device_type = &device_type, path = &path, "device detected");
                 devices.push(Device { name, device_type, path });
             }
         }
     }
 
     if devices.len() == 0 {
-        return Err("no devices found".into());
+        anyhow::bail!("no devices found");
     }
 
     Ok(devices)
 }
 
-pub fn rip_titles(command: &str, device: &str, ids: Vec<usize>, output_dir: &str, progress: &dyn Fn(&str, &str, f32, usize) -> ()) -> Result<(), Box<dyn Error>> {
-    for (i, id) in ids.iter().enumerate() {
-        let process = Command::new(command)
-            .args([
-                "--messages=-stdout",
-                "--progress=-same",
-                "-r",
-                "mkv",
-                format!("dev:{}", device).as_str(),
-                id.to_string().as_str(),
-                output_dir,
-            ])
-            .stdout(Stdio::piped())
-            .spawn()?;
-
-        let stdout = BufReader::new(process.stdout.ok_or("failed to capture stdout")?);
-
-        let mut current_step = String::new();
-        let mut current_step_details = String::new();
-        let mut current_progress = 0.0;
-
-        for line in stdout.lines() {
-            let line = line?;
-
-            let columns = parser::parse_csv_line(&line);
-
-            match columns[0].as_str() {
-                x if x.starts_with("PRGT:") => {
-                    current_step = columns.get(2).ok_or("missing value")?.to_string();
-                }
-                x if x.starts_with("PRGC:") => {
-                    current_step_details = columns.get(2).ok_or("missing value")?.to_string();
-                }
-                x if x.starts_with("PRGV:") => {
-                    let curr: f32 = columns.get(1).ok_or("missing value")?.parse()?;
-                    let total: f32 = columns.get(2).ok_or("missing value")?.parse()?;
-                    current_progress = curr / total;
-                }
-                _ => {}
-            }
-
-            progress(current_step.as_str(), current_step_details.as_str(), current_progress, i);
-        }
-    }
-
-    Ok(())
-}
-
-pub fn read_properties(command: &str, device: &str) -> Result<Disc, Box<dyn Error>> {
+/// Reads properties of a disc device by executing a given command and parsing its output.
+///
+/// This function spawns a new process to run the specified command with arguments
+/// `-r info dev:<device>`. It captures the standard output of this process and reads it
+/// line by line, parsing each line as CSV. The function extracts various properties
+/// and streams (video, audio, subtitles) from the output and populates a `Disc` struct
+/// with this information.
+///
+/// # Arguments
+///
+/// * `command` - A string slice that holds the command to be executed (path of makemkvcon).
+/// * `device` - A string slice that represents the device identifier (path of blue ray / dvd drive).
+/// * `makemkv_mutex` - An `Arc<Mutex<()>>` that ensures mutual exclusion when accessing shared resources.
+///
+/// # Returns
+///
+/// This function returns a `Result` containing a `Disc` struct if successful, or an error
+/// if any error occurs during execution or parsing.
+///
+/// # Errors
+///
+/// This function will return an error if:
+/// - The process cannot be spawned.
+/// - The standard output of the process cannot be captured.
+/// - Any required property or value is missing or cannot be parsed.
+///
+/// # Example
+///
+/// ```rust
+/// use makemkv_core::{read_properties};
+/// use std::sync::{Arc, Mutex};
+///
+/// let command = "makemkvcon";
+/// let device = "/dev/sr0";
+/// let makemkv_mutex = Arc::new(Mutex::new(()));
+///
+/// match read_properties(command, device, makemkv_mutex) {
+///     Ok(disc) => println!("Disc properties: {:?}", disc),
+///     Err(e) => eprintln!("Error reading properties: {}", e),
+/// }
+/// ```
+pub fn read_properties(command: &str, device: &str, makemkv_mutex: Arc<Mutex<()>>) -> Result<Disc> {
     enum StreamType {
         Video,
         Audio,
         Subtitle,
     }
 
+    let _lock = makemkv_mutex.lock().unwrap();
+
+    info!("reading properties for device: {} with command: {}", device, command);
+
     let process = Command::new(command.to_owned())
         .args(["-r", "info", format!("dev:{}", device).as_str()])
         .stdout(Stdio::piped())
         .spawn()?;
 
-    let stdout = BufReader::new(process.stdout.ok_or("failed to capture stdout")?);
+    let stdout = BufReader::new(process.stdout.ok_or(anyhow!("failed to capture stdout"))?);
 
     let mut disc = Disc::default();
     let mut stream_type = StreamType::Video;
@@ -112,7 +157,7 @@ pub fn read_properties(command: &str, device: &str) -> Result<Disc, Box<dyn Erro
         match columns[0].as_str() {
             x if x.starts_with("CINFO:") => {
                 let code: usize = x.trim_start_matches("CINFO:").parse()?;
-                let value = columns.get(2).ok_or("missing value")?.to_string();
+                let value = columns.get(2).ok_or(anyhow!("missing disc value"))?.to_string();
 
                 match code {
                     1 => disc.disc_type = value,
@@ -123,13 +168,13 @@ pub fn read_properties(command: &str, device: &str) -> Result<Disc, Box<dyn Erro
                     31 => disc.panel_title = value,
                     32 => disc.volume_name = value,
                     33 => disc.order_weight = value.parse()?,
-                    _ => println!("unhandled disc code: {}", code),
+                    _ => info!("unhandled disc code: {}", code),
                 }
             }
             x if x.starts_with("TINFO:") => {
                 let id: usize = x.trim_start_matches("TINFO:").parse()?;
-                let code: usize = columns.get(1).ok_or("missing code")?.parse()?;
-                let value = columns.get(3).ok_or("missing value")?.to_string();
+                let code: usize = columns.get(1).ok_or(anyhow!("missing title code"))?.parse()?;
+                let value = columns.get(3).ok_or(anyhow!("missing title value"))?.to_string();
 
                 if disc.titles.len() <= id {
                     disc.titles.resize(id + 1, Title::default());
@@ -151,13 +196,13 @@ pub fn read_properties(command: &str, device: &str) -> Result<Disc, Box<dyn Erro
                     30 => disc.titles[id].tree_info = value,
                     31 => disc.titles[id].panel_title = value,
                     33 => disc.titles[id].order_weight = value.parse()?,
-                    _ => println!("unhandled title code: {}", code),
+                    _ => info!("unhandled title code: {}", code),
                 }
             }
             x if x.starts_with("SINFO:") => {
                 let title_id: usize = x.trim_start_matches("SINFO:").parse()?;
-                let code: usize = columns.get(2).ok_or("missing code")?.parse()?;
-                let value = columns.get(4).ok_or("missing value")?.to_string();
+                let code: usize = columns.get(2).ok_or(anyhow!("missing stream code"))?.parse()?;
+                let value = columns.get(4).ok_or(anyhow!("missing stream value"))?.to_string();
 
                 if code == 1 {
                     match value.as_str() {
@@ -174,7 +219,7 @@ pub fn read_properties(command: &str, device: &str) -> Result<Disc, Box<dyn Erro
                             stream_type = StreamType::Subtitle;
                             subtitle_stream_id += 1;
                         }
-                        _ => println!("unhandled stream type: {}", value),
+                        _ => info!("unhandled stream type: {}", value),
                     }
                 }
 
@@ -198,7 +243,7 @@ pub fn read_properties(command: &str, device: &str) -> Result<Disc, Box<dyn Erro
                             33 => stream_ref.order_weight = value.parse()?,
                             38 => stream_ref.mkv_flags = value,
                             42 => stream_ref.output_conversion_type = value,
-                            _ => println!("unhandled subtitle code: {}", code),
+                            _ => info!("unhandled video stream code: {}", code),
                         }
                     }
                     StreamType::Audio => {
@@ -234,7 +279,7 @@ pub fn read_properties(command: &str, device: &str) -> Result<Disc, Box<dyn Erro
                             39 => stream_ref.mkv_flags_text = value,
                             40 => stream_ref.audio_channel_layout_name = value,
                             42 => stream_ref.output_conversion_type = value,
-                            _ => println!("unhandled subtitle code: {}", code),
+                            _ => info!("unhandled audio stream code: {}", code),
                         }
                     }
                     StreamType::Subtitle => {
@@ -264,7 +309,7 @@ pub fn read_properties(command: &str, device: &str) -> Result<Disc, Box<dyn Erro
                             38 => stream_ref.mkv_flags = value,
                             39 => stream_ref.mkv_flags_text = value,
                             42 => stream_ref.output_conversion_type = value,
-                            _ => println!("unhandled subtitle code: {}", code),
+                            _ => info!("unhandled subtitle stream code: {}", code),
                         }
                     }
                 }
@@ -345,4 +390,64 @@ pub async fn filter_tv_series_candidates(disc: Disc, langs: Vec<&str>, season: u
     filtered_disc.titles = filtered_titles;
 
     Ok(filtered_disc)
+}
+
+pub fn rip_titles(
+    command: &str,
+    device: &str,
+    ids: Vec<usize>,
+    output_dir: &str,
+    cancel_flag: Arc<AtomicBool>,
+    progress: &dyn Fn(String, String, f32, usize) -> (),
+) -> Result<(), Box<dyn Error>> {
+    for (i, id) in ids.iter().enumerate() {
+        let mut process = Command::new(command)
+            .args([
+                "--messages=-stdout",
+                "--progress=-same",
+                "-r",
+                "mkv",
+                format!("dev:{}", device).as_str(),
+                id.to_string().as_str(),
+                output_dir,
+            ])
+            .stdout(Stdio::piped())
+            .spawn()?;
+
+        let stdout = BufReader::new(process.stdout.take().ok_or("failed to capture stdout")?);
+
+        let mut current_step = String::new();
+        let mut current_step_details = String::new();
+        let mut current_progress = 0.0;
+
+        for line in stdout.lines() {
+            if cancel_flag.load(Ordering::Relaxed) {
+                process.kill()?;
+                return Err("Operation aborted".into());
+            }
+
+            let line = line?;
+
+            let columns = parser::parse_csv_line(&line);
+
+            match columns[0].as_str() {
+                x if x.starts_with("PRGT:") => {
+                    current_step = columns.get(2).ok_or("missing value")?.to_string();
+                }
+                x if x.starts_with("PRGC:") => {
+                    current_step_details = columns.get(2).ok_or("missing value")?.to_string();
+                }
+                x if x.starts_with("PRGV:") => {
+                    let curr: f32 = columns.get(1).ok_or("missing value")?.parse()?;
+                    let total: f32 = columns.get(2).ok_or("missing value")?.parse()?;
+                    current_progress = curr / total;
+                }
+                _ => {}
+            }
+
+            progress(current_step.clone(), current_step_details.clone(), current_progress, i);
+        }
+    }
+
+    Ok(())
 }

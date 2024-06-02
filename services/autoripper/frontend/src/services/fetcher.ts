@@ -5,7 +5,7 @@ import { QueryClient } from '@tanstack/react-query';
 export const DEFAULT_STALE_TIME = 1000 * 60 * 10;
 
 export const queryClient = new QueryClient({
-  defaultOptions: { queries: { retry: 0, staleTime: DEFAULT_STALE_TIME } },
+  defaultOptions: { queries: { retry: 0, staleTime: DEFAULT_STALE_TIME, refetchOnWindowFocus: false } },
 });
 
 type FetcherPayload<T> = {
@@ -23,6 +23,8 @@ export const logError = (error: unknown) => {
 
 export const fetcher = async <T>(url: string, payload: FetcherPayload<T>): Promise<T> => {
   const { msg, parser, signal, body, method = 'GET', includeCredentials = false } = payload;
+
+  console.log('fetching', url, payload);
 
   const response = await fetch(url, {
     signal,

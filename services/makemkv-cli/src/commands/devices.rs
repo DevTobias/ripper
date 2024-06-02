@@ -1,3 +1,5 @@
+use std::sync::{Arc, Mutex};
+
 use makemkv_core::detect_devices;
 
 #[derive(Clone, Debug, clap::Parser)]
@@ -11,7 +13,8 @@ pub struct Devices {
 }
 
 pub fn device_execution(args: &Devices) {
-    let devices = detect_devices(&args.location).unwrap();
+    let lock = Arc::new(Mutex::new(()));
+    let devices = detect_devices(&args.location, lock).unwrap();
 
     if devices.len() == 0 {
         return eprintln!("No devices found.");
