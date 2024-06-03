@@ -18,7 +18,7 @@ export const SeriesSelection: FC<Props> = ({ form }) => {
   const selectedSeason = form.watch('selectedSeason');
 
   const { data, isLoading } = useQuery(
-    getTvDetailsQuery({ id: selectedMedia?.id, enabled: form.watch('type') === 'tv_show' })
+    getTvDetailsQuery({ id: selectedMedia?.id, enabled: form.watch('type') === 'tv_show', lang: 'de' })
   );
 
   return (

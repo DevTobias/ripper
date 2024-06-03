@@ -16,11 +16,11 @@ export const MediaSelectionDrawer: FC<Props> = ({ type, onMediaSelect, children 
   const [debouncedQuery, overrideDebouncedQuery] = useDebouncedState(query, '', 500);
 
   const movieQuery = useQuery(
-    searchMovieQuery({ query: debouncedQuery, lang: 'de-DE', enabled: type === 'movie' && debouncedQuery.length >= 3 })
+    searchMovieQuery({ query: debouncedQuery, lang: 'de', enabled: type === 'movie' && debouncedQuery.length >= 3 })
   );
 
   const tvShowQuery = useQuery(
-    searchTvShowQuery({ query: debouncedQuery, lang: 'de-DE', enabled: type === 'tv_show' && debouncedQuery.length >= 3 })
+    searchTvShowQuery({ query: debouncedQuery, lang: 'de', enabled: type === 'tv_show' && debouncedQuery.length >= 3 })
   );
 
   useEffect(() => {

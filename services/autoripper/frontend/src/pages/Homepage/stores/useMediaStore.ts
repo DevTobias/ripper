@@ -32,12 +32,20 @@ export type MetadataFormValues = z.infer<typeof metadataFormSchema>;
 
 type State = {
   metadata?: MetadataFormValues;
+  selectedTitles: string[];
 };
 
 type Actions = {
   setMetadata: (mediaInfo: MetadataFormValues) => void;
+  setSelectedTitles: (selectedTitles: string[]) => void;
+};
+
+const defaultState: State = {
+  selectedTitles: [],
 };
 
 export const useMediaStore = create<State & Actions>()((set) => ({
+  ...defaultState,
   setMetadata: (metadata) => set({ metadata }),
+  setSelectedTitles: (selectedTitles) => set({ selectedTitles }),
 }));

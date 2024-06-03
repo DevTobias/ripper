@@ -27,11 +27,14 @@ export const ProcessProgress = () => {
   });
 
   const metadata = useMediaStore(useShallow((state) => state.metadata));
+  const selectedTitles = useMediaStore(useShallow((state) => state.selectedTitles));
+
+  const enableStart = metadata && selectedTitles.length > 0;
 
   const { sendMessage } = useWebSocket(
     metadata ? endpointFactory.ripMovieWebsocket(metadata.selectedMedia.id, ['deu'], metadata.device) : '',
     { onMessage: (event) => setRippingProgress(ProgressSchema.parse(JSON.parse(event.data as string))) },
-    inProgress && !!metadata
+    inProgress && enableStart
   );
 
   const start = () => {
@@ -55,13 +58,13 @@ export const ProcessProgress = () => {
         className='relative z-20'
       >
         {!inProgress && (
-          <Button className='aspect-square min-w-0 p-0' disabled={!metadata} onClick={start}>
+          <Button className='aspect-square min-w-0 p-0' disabled={!enableStart} onClick={start}>
             <SquarePlay className='size-6' />
           </Button>
         )}
 
         {inProgress && (
-          <Button className='aspect-square min-w-0 p-0' disabled={!metadata} onClick={cancel}>
+          <Button className='aspect-square min-w-0 p-0' disabled={!enableStart} onClick={cancel}>
             <OctagonX className='size-6 animate-[spin_2s_linear_infinite]' />
           </Button>
         )}
