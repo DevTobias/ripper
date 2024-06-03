@@ -80,7 +80,7 @@ pub async fn get_encoding_profiles_handler() -> impl IntoResponse {
 //
 
 pub async fn get_devices_handler(State(state): State<AppState>) -> Result<impl IntoResponse, AppError> {
-    let devices = detect_devices(&state.command, state.makemkv_mutex)?;
+    let devices = detect_devices(&state.command, &state.makemkv_mutex)?;
     Ok(Json(devices).into_response())
 }
 
@@ -116,23 +116,11 @@ pub async fn rip_movie_websocket_handler(Query(params): Query<RipMoviePayload>, 
         });
 
         thread::spawn(move || {
-            let _ = rip_titles(
-                &state.command,
-                &params.device,
-                vec![main_feature.id],
-                &output_dir,
-                cancel_flag,
-                &|step_title: String, step_details: String, progress: f32, step: usize| {
-                    let payload = ProgressPayload {
-                        step_title,
-                        step_details,
-                        progress,
-                        step,
-                    };
+            let _ = rip_titles(&state.command, &params.device, vec![main_feature.id], &output_dir, cancel_flag, &|step_title: String, step_details: String, progress: f32, step: usize| {
+                let payload = ProgressPayload { step_title, step_details, progress, step };
 
-                    sender.send(("progress", Some(payload))).unwrap();
-                },
-            );
+                sender.send(("progress", Some(payload))).unwrap();
+            });
 
             sender.send(("done", None)).unwrap();
         });

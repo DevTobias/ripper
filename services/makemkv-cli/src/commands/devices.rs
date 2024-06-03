@@ -14,7 +14,7 @@ pub struct Devices {
 
 pub fn device_execution(args: &Devices) {
     let lock = Arc::new(Mutex::new(()));
-    let devices = detect_devices(&args.location, lock).unwrap();
+    let devices = detect_devices(&args.location, &lock).unwrap();
 
     if devices.len() == 0 {
         return eprintln!("No devices found.");
