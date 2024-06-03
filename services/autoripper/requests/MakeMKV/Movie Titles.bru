@@ -1,0 +1,17 @@
+meta {
+  name: Movie Titles
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{base_url}}/api/makemkv/titles/movie?langs=deu&tmdb_id=916224&device=/dev/rdisk4
+  body: none
+  auth: none
+}
+
+query {
+  langs: deu
+  tmdb_id: 916224
+  device: /dev/rdisk4
+}

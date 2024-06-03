@@ -39,7 +39,7 @@ use crate::Disc;
 /// let filtered_disc = filter_movie_candidates(disc, langs, tmdb_id, &client).await?;
 /// ```
 pub async fn filter_movie_main_features(disc: Disc, langs: &[&str], tmdb_id: u32, client: &TmdbClient) -> Result<Disc> {
-    let movie = client.get_movie(tmdb_id).await.context("failed to fetch movie details")?;
+    let movie = client.get_movie(tmdb_id, langs[0]).await.context("failed to fetch movie details")?;
     let actual_runtime = (movie.runtime * 60) as f32;
 
     let mut filtered_disc = disc.clone();
@@ -105,7 +105,7 @@ pub async fn filter_movie_main_features(disc: Disc, langs: &[&str], tmdb_id: u32
 /// let filtered_disc = filter_tv_series_candidates(disc, &langs, season, &episodes, tmdb_id, &client).await?;
 /// ```
 pub async fn filter_tv_series_main_features(disc: Disc, langs: &[&str], season: u16, episodes: &[u16], tmdb_id: u32, client: &TmdbClient) -> Result<Disc> {
-    let tv_series = client.get_tv_series(tmdb_id).await.context("failed to fetch TV series details")?;
+    let tv_series = client.get_tv_series(tmdb_id, langs[0]).await.context("failed to fetch TV series details")?;
 
     let episode_runtimes: Vec<f32> = tv_series
         .seasons

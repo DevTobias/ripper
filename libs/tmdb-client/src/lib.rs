@@ -57,16 +57,16 @@ impl TmdbClient {
     /// ```
     /// let response: Result<GenericSearchResponse<MovieSearchResult>, Error> = tmdb_client.tmdb_request("search/movie?query=Inception&include_adult=false&language=en").await;
     /// ```
-    async fn tmdb_request<T>(&self, endpoint: &str) -> Result<T>
+    async fn tmdb_request<T>(&self, url: &str) -> Result<T>
     where
         T: serde::de::DeserializeOwned,
     {
         self.client
-            .get(&format!("{}/{}", TMDB_BASE_URL, endpoint))
+            .get(url)
             .bearer_auth(&self.api_key)
             .send()
             .await
-            .context(format!("could not fetch {}", endpoint))?
+            .context(format!("could not fetch {}", url))?
             .error_for_status()?
             .json::<T>()
             .await
@@ -91,14 +91,10 @@ impl TmdbClient {
     ///
     /// Returns an error if URL construction fails, or if the request fails.
     pub async fn search_movies(&self, query: &str, lang: &str) -> Result<GenericSearchResponse<MovieSearchResult>> {
-        let mut url = Url::parse(TMDB_BASE_URL)?.join("/search/movie").context("could not parse URL")?;
-        url.query_pairs_mut()
-            .append_pair("include_adult", "false")
-            .append_pair("query", query)
-            .append_pair("language", lang);
+        let url = Url::parse_with_params(&format!("{}/search/movie", TMDB_BASE_URL), &[("include_adult", "false"), ("query", query), ("language", lang)])
+            .context("could not parse URL")?;
 
         info!("Searching movies with query: {}", query);
-
         self.tmdb_request::<GenericSearchResponse<MovieSearchResult>>(url.as_str()).await
     }
 
@@ -118,14 +114,10 @@ impl TmdbClient {
     ///
     /// Returns an error if URL construction fails, or if the request fails.
     pub async fn search_tv_series(&self, query: &str, lang: &str) -> Result<GenericSearchResponse<TvSeriesSearchResult>> {
-        let mut url = Url::parse(TMDB_BASE_URL)?.join("/search/tv").context("could not parse URL")?;
-        url.query_pairs_mut()
-            .append_pair("include_adult", "false")
-            .append_pair("query", query)
-            .append_pair("language", lang);
+        let url = Url::parse_with_params(&format!("{}/search/tv", TMDB_BASE_URL), &[("include_adult", "false"), ("query", query), ("language", lang)])
+            .context("could not parse URL")?;
 
         info!("Searching tv shows with query: {}", query);
-
         self.tmdb_request::<GenericSearchResponse<TvSeriesSearchResult>>(url.as_str()).await
     }
 
@@ -142,8 +134,9 @@ impl TmdbClient {
     /// # Errors
     ///
     /// Returns an error if URL construction fails, or if the request fails.
-    pub async fn get_movie(&self, id: u32) -> Result<Movie> {
-        let url = Url::parse(TMDB_BASE_URL)?.join(&format!("/movie/{}", id)).context("could not parse URL")?;
+    pub async fn get_movie(&self, id: u32, lang: &str) -> Result<Movie> {
+        let url = Url::parse_with_params(&format!("{}/movie/{}", TMDB_BASE_URL, id), &[("language", lang)]).context("could not parse URL")?;
+
         info!("Fetching movie with id: {}", id);
         self.tmdb_request::<Movie>(url.as_str()).await
     }
@@ -161,13 +154,13 @@ impl TmdbClient {
     /// # Errors
     ///
     /// Returns an error if URL construction fails, the request fails, or if fetching season details fails.
-    pub async fn get_tv_series(&self, id: u32) -> Result<TvSeries> {
-        let url = Url::parse(TMDB_BASE_URL)?.join(&format!("/tv/{}", id)).context("could not parse URL")?;
+    pub async fn get_tv_series(&self, id: u32, lang: &str) -> Result<TvSeries> {
+        let url = Url::parse_with_params(&format!("{}/tv/{}", TMDB_BASE_URL, id), &[("language", lang)]).context("could not parse URL")?;
 
         info!("Fetching tv series with id: {}", id);
         let mut response = self.tmdb_request::<TvSeries>(url.as_str()).await?;
 
-        let season_futures = (1..=response.last_episode_to_air.season_number).map(|season| self.get_season_details(id, season));
+        let season_futures = (1..=response.last_episode_to_air.season_number).map(|season| self.get_season_details(id, season, lang));
         response.seasons = try_join_all(season_futures).await.context("could not fetch season details")?;
 
         Ok(response)
@@ -183,13 +176,10 @@ impl TmdbClient {
     /// # Returns
     ///
     /// A `Result` containing a `TvSeason` struct if the request is successful, or an error if the request fails.
-    pub async fn get_season_details(&self, id: u32, season: u16) -> Result<TvSeason> {
-        let url = Url::parse(TMDB_BASE_URL)?
-            .join(&format!("tv/{}/season/{}", id, season))
-            .context("could not parse URL")?;
+    pub async fn get_season_details(&self, id: u32, season: u16, lang: &str) -> Result<TvSeason> {
+        let url = Url::parse_with_params(&format!("{}/tv/{}/season/{}", TMDB_BASE_URL, id, season), &[("language", lang)]).context("could not parse URL")?;
 
         info!("Fetching tv season details for id {} and season {}", id, season);
-
         self.tmdb_request::<TvSeason>(url.as_str()).await
     }
 }

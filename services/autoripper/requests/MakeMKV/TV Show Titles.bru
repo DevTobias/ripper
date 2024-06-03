@@ -1,0 +1,20 @@
+meta {
+  name: TV Show Titles
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{base_url}}/api/makemkv/titles/tv?langs=deu&tmdb_id=94997&device=/dev/rdisk4&season=1&episodes=1&episodes=2
+  body: none
+  auth: none
+}
+
+query {
+  langs: deu
+  tmdb_id: 94997
+  device: /dev/rdisk4
+  season: 1
+  episodes: 1
+  episodes: 2
+}

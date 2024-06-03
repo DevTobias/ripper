@@ -2,7 +2,7 @@
 
 # Rust specific
 /target
-ripper_output
+.output
 
 # React specific
 node_modules

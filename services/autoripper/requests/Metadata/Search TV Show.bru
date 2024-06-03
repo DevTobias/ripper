@@ -1,0 +1,16 @@
+meta {
+  name: Search TV Show
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{base_url}}/api/tmdb/search/tv?query=House of the Dragon&lang=de
+  body: none
+  auth: none
+}
+
+query {
+  query: House of the Dragon
+  lang: de
+}

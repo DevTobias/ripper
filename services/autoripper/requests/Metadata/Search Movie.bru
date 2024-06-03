@@ -1,0 +1,16 @@
+meta {
+  name: Search Movie
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{base_url}}/api/tmdb/search/movie?query=Suzume&lang=de
+  body: none
+  auth: none
+}
+
+query {
+  query: Suzume
+  lang: de
+}

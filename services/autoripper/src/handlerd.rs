@@ -1,12 +1,9 @@
-use anyhow::Result;
 use axum::{
     extract::{
         ws::{Message, WebSocket},
         State, WebSocketUpgrade,
     },
-    http::StatusCode,
     response::IntoResponse,
-    Json,
 };
 use axum_extra::extract::Query;
 use futures::{sink::SinkExt, stream::StreamExt};
@@ -22,22 +19,10 @@ use std::{
 };
 use tokio::fs;
 
-use handbrake_core::get_encoding_profiles;
-use makemkv_core::{detect_devices, filter_movie_candidates, read_properties, rip_titles};
+use makemkv_core::rip_titles;
 use tracing::info;
 
-use crate::{error::AppError, AppState};
-
-#[derive(Deserialize)]
-pub struct SearchPayload {
-    query: String,
-    lang: String,
-}
-
-#[derive(Deserialize)]
-pub struct MediaDetailsPayload {
-    id: u32,
-}
+use crate::AppState;
 
 #[derive(Deserialize, Debug)]
 pub struct RipMoviePayload {
@@ -53,35 +38,6 @@ pub struct ProgressPayload {
     step_details: String,
     progress: f32,
     step: usize,
-}
-
-//
-
-pub async fn search_movie_handler(State(state): State<AppState>, Json(payload): Json<SearchPayload>) -> impl IntoResponse {
-    (StatusCode::OK, Json(state.tmdb_client.search_movies(&payload.query, &payload.lang).await.unwrap()))
-}
-
-pub async fn search_tv_series_handler(State(state): State<AppState>, Json(payload): Json<SearchPayload>) -> impl IntoResponse {
-    (StatusCode::OK, Json(state.tmdb_client.search_tv_series(&payload.query, &payload.lang).await.unwrap()))
-}
-
-pub async fn get_tv_details_handler(State(state): State<AppState>, Json(payload): Json<MediaDetailsPayload>) -> impl IntoResponse {
-    (StatusCode::OK, Json(state.tmdb_client.get_tv_series(payload.id).await.unwrap()))
-}
-
-pub async fn get_movie_details_handler(State(state): State<AppState>, Json(payload): Json<MediaDetailsPayload>) -> impl IntoResponse {
-    (StatusCode::OK, Json(state.tmdb_client.get_movie(payload.id).await.unwrap()))
-}
-
-pub async fn get_encoding_profiles_handler() -> impl IntoResponse {
-    (StatusCode::OK, Json(get_encoding_profiles()))
-}
-
-//
-
-pub async fn get_devices_handler(State(state): State<AppState>) -> Result<impl IntoResponse, AppError> {
-    let devices = detect_devices(&state.command, &state.makemkv_mutex)?;
-    Ok(Json(devices).into_response())
 }
 
 pub async fn rip_movie_websocket_handler(Query(params): Query<RipMoviePayload>, State(state): State<AppState>, ws: WebSocketUpgrade) -> impl IntoResponse {
