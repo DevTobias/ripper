@@ -30,6 +30,12 @@ export const de = {
           seasonSelection: 'Auswahl der Staffel',
         },
       },
+      titleSelection: {
+        scanDisc: 'Disc scannen',
+        chapters: '{{amount}} Kapitel',
+        description:
+          'Hier kannst du die Titel auswählen, die du sichern möchtest. Diese sind bereits vorselektiert, sodass nur Titel angezeigt werden, die potentiell das Main Feature sein könnten. Klicke auf <strong>Disc scannen</strong>, um die Titel zu laden. <br /><br /> Hast du einen Film ausgewählt, so musst du alle Titel bis auf den löschen, den du sichern möchtest. Bei Serien kannst du mehrere Episoden miteinmal auswählen. Die Anzahl muss dabei mit den vorher ausgewählten Episoden übereinstimmen. Die Reihenfolge wird direkt auf die ausgewählten Episoden übertragen, sortiere also die Titel falls notwendig.',
+      },
     },
   },
 };

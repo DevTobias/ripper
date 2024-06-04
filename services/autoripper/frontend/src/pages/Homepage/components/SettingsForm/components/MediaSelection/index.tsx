@@ -1,6 +1,7 @@
 import { Search } from 'lucide-react';
 import { FC, ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useShallow } from 'zustand/react/shallow';
 
 import { Button } from '$/components/common/ui/button';
 import { FormField } from '$/components/common/ui/form';
@@ -8,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '$/components/common/ui
 import { MovieSelection } from '$/pages/Homepage/components/SettingsForm/components/MediaSelection/components/MovieSelection';
 import { SeriesSelection } from '$/pages/Homepage/components/SettingsForm/components/MediaSelection/components/SeriesSelection';
 import { MediaSelectionDrawer } from '$/pages/Homepage/components/SettingsForm/components/MediaSelectionDrawer';
+import { useMediaStore } from '$/pages/Homepage/stores/useMediaStore';
 
 import type { MetadataFormControl } from '$/pages/Homepage/components/SettingsForm';
 
@@ -18,6 +20,8 @@ interface Props {
 
 export const MediaSelection: FC<Props> = ({ children, form }) => {
   const { t } = useTranslation();
+
+  const rippingInProgress = useMediaStore(useShallow((state) => state.rippingInProgress));
 
   return (
     <FormField
@@ -36,10 +40,10 @@ export const MediaSelection: FC<Props> = ({ children, form }) => {
         >
           <div className='flex gap-3'>
             <TabsList className='w-full'>
-              <TabsTrigger value='movie' className='w-full'>
+              <TabsTrigger value='movie' className='w-full' disabled={rippingInProgress}>
                 {t('homepage.metadata.media.movie')}
               </TabsTrigger>
-              <TabsTrigger value='tv_show' className='w-full'>
+              <TabsTrigger value='tv_show' className='w-full' disabled={rippingInProgress}>
                 {t('homepage.metadata.media.tvShow')}
               </TabsTrigger>
             </TabsList>
@@ -61,6 +65,7 @@ export const MediaSelection: FC<Props> = ({ children, form }) => {
                       className='aspect-square h-full p-3'
                       type='button'
                       variant={form.getFieldState('selectedMedia').error ? 'destructive' : 'default'}
+                      disabled={rippingInProgress}
                     >
                       <Search className='size-4' />
                     </Button>

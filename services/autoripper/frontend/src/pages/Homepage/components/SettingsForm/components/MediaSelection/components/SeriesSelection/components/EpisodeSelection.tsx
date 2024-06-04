@@ -4,16 +4,17 @@ import { Button } from '$/components/common/ui/button';
 import { FormControl, FormField, FormItem } from '$/components/common/ui/form';
 import { cn, repeat } from '$/lib/utils';
 import { LoadingSelectionButton } from '$/pages/Homepage/components/SettingsForm/components/LoadingSelectionButton';
+import { Episode } from '$/services/metadata';
 
 import type { MetadataFormControl } from '$/pages/Homepage/components/SettingsForm';
 
 interface Props {
   form: MetadataFormControl;
-  episodeNumbers?: number[];
+  episodes?: Episode[];
   isLoading: boolean;
 }
 
-export const EpisodeSelection: FC<Props> = ({ form, episodeNumbers, isLoading }) => {
+export const EpisodeSelection: FC<Props> = ({ form, episodes, isLoading }) => {
   return (
     <FormField
       control={form.control}
@@ -22,24 +23,25 @@ export const EpisodeSelection: FC<Props> = ({ form, episodeNumbers, isLoading })
         <FormItem>
           <FormControl>
             <div className='flex h-[80px] flex-wrap gap-1 overflow-y-auto'>
-              {episodeNumbers?.map((episode) => {
-                const isActive = field.value.includes(episode);
+              {episodes?.map((episode) => {
+                const isActive = field.value.includes(episode.episode_number);
 
                 return (
                   <Button
-                    key={episode}
-                    className={cn('aspect-square size-9 min-w-0 p-0', fieldState.error && 'border-red-500')}
+                    key={episode.episode_number}
+                    className={cn('h-9 w-12 min-w-0 p-0 flex flex-col', fieldState.error && 'border-red-500')}
                     variant={isActive ? 'default' : 'outline'}
                     onClick={() => {
                       if (isActive) {
-                        field.onChange(field.value.filter((value) => value !== episode));
+                        field.onChange(field.value.filter((value) => value !== episode.episode_number));
                       } else {
-                        field.onChange([...field.value, episode]);
+                        field.onChange([...field.value, episode.episode_number]);
                       }
                     }}
                     type='button'
                   >
-                    E{episode}
+                    <span className='leading-none'>E{episode.episode_number}</span>
+                    {episode.runtime && <span className='text-[10px] leading-none opacity-60'>{episode.runtime} min</span>}
                   </Button>
                 );
               })}

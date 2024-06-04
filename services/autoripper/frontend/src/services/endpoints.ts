@@ -3,8 +3,7 @@ export const BASE_URL = 'http://192.168.178.47:3000/api';
 export const DEVICE_ENDPOINT = `${BASE_URL}/makemkv/devices`;
 export const MOVIE_DISC_PROPERTIES = `${BASE_URL}/makemkv/titles/movie`;
 export const TV_SHOW_DISC_PROPERTIES = `${BASE_URL}/makemkv/titles/tv`;
-
-export const RIP_MOVIE_WEB_SOCKET_ENDPOINT = `${BASE_URL}/rip/movie/ws`;
+export const RIP_MOVIE_WEB_SOCKET_ENDPOINT = `${BASE_URL}/makemkv/rip/movie/ws`;
 
 export const ENCODING_PRESETS_ENDPOINT = `${BASE_URL}/handbrake/encoding-presets`;
 
@@ -24,9 +23,9 @@ export const endpoints = {
 };
 
 export const endpointFactory = {
-  ripMovieWebsocket: (id: number, langs: string[], device: string) => {
-    const params = new URLSearchParams(Object.entries({ tmdb_id: id.toString(), device }));
-    langs.forEach((lang) => params.append('langs', lang));
+  ripMovieWebsocket: (titles: string[], device: string) => {
+    const params = new URLSearchParams(Object.entries({ device }));
+    titles.forEach((title) => params.append('titles', title));
     return `${RIP_MOVIE_WEB_SOCKET_ENDPOINT}?${params.toString()}`;
   },
   searchMovie: (query: string, lang: string) => {

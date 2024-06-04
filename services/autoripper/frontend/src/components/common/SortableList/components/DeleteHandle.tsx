@@ -11,9 +11,10 @@ interface Props<T extends BaseItem> {
   id: UniqueIdentifier;
   items: T[];
   onChange(items: T[]): void;
+  disabled?: boolean;
 }
 
-export const DeleteHandle = <T extends BaseItem>({ id, items, onChange }: Props<T>) => {
+export const DeleteHandle = <T extends BaseItem>({ id, items, disabled, onChange }: Props<T>) => {
   return (
     <Button
       variant='ghost'
@@ -22,6 +23,7 @@ export const DeleteHandle = <T extends BaseItem>({ id, items, onChange }: Props<
         if (items.length === 1) return;
         onChange(items.filter((prevItem) => prevItem.id !== id));
       }}
+      disabled={disabled}
     >
       <Trash2 className='size-4 text-neutral-400' />
     </Button>

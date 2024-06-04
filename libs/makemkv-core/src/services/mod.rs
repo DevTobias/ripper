@@ -16,3 +16,4 @@ pub use feature_detection::filter_tv_series_main_features;
 
 pub mod disc_ripper;
 pub use disc_ripper::rip_titles;
+pub use disc_ripper::ProgressPayload;

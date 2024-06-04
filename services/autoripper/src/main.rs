@@ -12,7 +12,7 @@ mod handler;
 #[derive(Debug, Clone)]
 struct AppState {
     command: String,
-    // output_dir: String,
+    output_dir: String,
     origin: String,
     tmdb_client: TmdbClient,
     makemkv_mutex: Arc<Mutex<()>>,
@@ -22,7 +22,7 @@ struct AppState {
 async fn main() {
     let state = AppState {
         command: "/Applications/MakeMKV.app/Contents/MacOS/makemkvcon".to_string(),
-        // output_dir: "/Users/tobias.kaerst/Documents/projects/ripper/.output".to_string(),
+        output_dir: "/Users/tobias.kaerst/Documents/projects/ripper/.output".to_string(),
         origin: "http://localhost:5173".to_string(),
         tmdb_client: TmdbClient::new(std::env::var("TMDB_KEY").unwrap().as_str()),
         makemkv_mutex: Arc::new(Mutex::new(())),
@@ -50,7 +50,8 @@ async fn main() {
     let makemkv_routes = Router::new()
         .route("/devices", get(handler::get_devices_handler))
         .route("/titles/movie", get(handler::get_movie_titles_handler))
-        .route("/titles/tv", get(handler::get_tv_show_titles_handler));
+        .route("/titles/tv", get(handler::get_tv_show_titles_handler))
+        .route("/rip/movie/ws", get(handler::rip_movie_websocket_handler));
 
     let app = Router::new()
         .nest_service("/", ServeDir::new("./frontend/dist"))

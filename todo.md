@@ -1,2 +1,5 @@
--> add selection of titles
-https://master--5fc05e08a4a65d0021ae0bf2.chromatic.com/?path=/story/presets-sortable-vertical--removable-items
+- add handbrake library
+- handbrake all files after ripping
+
+- upload movie to radarr
+- upload episodes to sonarr in ripping order

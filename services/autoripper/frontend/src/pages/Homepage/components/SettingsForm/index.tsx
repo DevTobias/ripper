@@ -17,6 +17,7 @@ import type { UseFormReturn } from 'react-hook-form';
 export type MetadataFormControl = UseFormReturn<MetadataFormValues>;
 
 export const SettingsForm = () => {
+  const rippingInProgress = useMediaStore(useShallow((state) => state.rippingInProgress));
   const setMetadata = useMediaStore(useShallow((state) => state.setMetadata));
 
   const form = useForm<z.infer<typeof metadataFormSchema>>({
@@ -38,7 +39,7 @@ export const SettingsForm = () => {
         </div>
 
         <MediaSelection form={form}>
-          <Button type='submit' className='aspect-square h-full p-3'>
+          <Button type='submit' className='aspect-square h-full p-3' disabled={rippingInProgress}>
             <Save className='size-4' />
           </Button>
         </MediaSelection>

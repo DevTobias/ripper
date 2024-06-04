@@ -1,91 +1,99 @@
-import { OctagonX, SquarePlay } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect } from 'react';
 import useWebSocket from 'react-use-websocket';
 import { z } from 'zod';
 import { useShallow } from 'zustand/react/shallow';
 
 import { RadialProgressBar } from '$/components/common/RadialProgressBar';
-import { Button } from '$/components/common/ui/button';
+import { Badge } from '$/components/common/ui/badge';
+import { cn } from '$/lib/utils';
 import { useMediaStore } from '$/pages/Homepage/stores/useMediaStore';
 import { endpointFactory } from '$/services/endpoints';
 
-const ProgressSchema = z.object({
-  stepTitle: z.string(),
-  stepDetails: z.string(),
-  progress: z.number(),
-  step: z.number(),
+const WebsocketMessageSchema = z.object({
+  type: z.string(),
+  payload: z
+    .object({
+      stepTitle: z.string(),
+      stepDetails: z.string(),
+      progress: z.number(),
+      step: z.number(),
+    })
+    .optional(),
 });
 
+type WebsocketMessage = z.infer<typeof WebsocketMessageSchema>;
+
 export const ProcessProgress = () => {
-  const [inProgress, setInProgress] = useState(false);
-
-  const [rippingProgress, setRippingProgress] = useState<z.infer<typeof ProgressSchema>>({
-    progress: 0,
-    step: 0,
-    stepDetails: '',
-    stepTitle: '',
-  });
-
+  const rippingInProgress = useMediaStore(useShallow((state) => state.rippingInProgress));
+  const rippingProgress = useMediaStore(useShallow((state) => state.rippingProgress));
   const metadata = useMediaStore(useShallow((state) => state.metadata));
   const selectedTitles = useMediaStore(useShallow((state) => state.selectedTitles));
 
-  const enableStart = metadata && selectedTitles.length > 0;
+  const handleWebsocketMessage = (message: WebsocketMessage) => {
+    if (message.type === 'progress') {
+      useMediaStore.setState({ rippingProgress: message.payload! });
+    }
 
-  const { sendMessage } = useWebSocket(
-    metadata ? endpointFactory.ripMovieWebsocket(metadata.selectedMedia.id, ['deu'], metadata.device) : '',
-    { onMessage: (event) => setRippingProgress(ProgressSchema.parse(JSON.parse(event.data as string))) },
-    inProgress && enableStart
-  );
-
-  const start = () => {
-    setInProgress(true);
+    if (message.type === 'done') {
+      useMediaStore.setState({
+        selectedTitles: [],
+        metadata: null,
+        rippingInProgress: false,
+        rippingProgress: { progress: 0, step: 0, stepDetails: '', stepTitle: '' },
+      });
+    }
   };
 
-  const cancel = () => {
-    sendMessage('cancel');
-    setInProgress(false);
-    setRippingProgress({ progress: 0, step: 0, stepDetails: '', stepTitle: '' });
+  const { sendMessage } = useWebSocket(
+    metadata ? endpointFactory.ripMovieWebsocket(selectedTitles, metadata.device) : '',
+    { onMessage: (event) => handleWebsocketMessage(WebsocketMessageSchema.parse(JSON.parse(event.data as string))) },
+    rippingInProgress && !!metadata && selectedTitles.length > 0
+  );
+
+  useEffect(() => {
+    useMediaStore.getState().sendWebsocketMessage = sendMessage;
+  }, [sendMessage]);
+
+  const getCurrentProgress = () => {
+    return rippingProgress.progress * 100;
   };
 
   return (
     <div className='relative flex flex-col items-center'>
       <RadialProgressBar
-        progress={rippingProgress.progress * 100}
+        progress={getCurrentProgress()}
         size={200}
         strokeWidth={20}
         ringClassName='text-neutral-900'
-        bgClassName='text-neutral-900 opacity-30'
-        className='relative z-20'
+        bgClassName={cn('text-neutral-900 opacity-30', rippingInProgress && 'text-neutral-700 animate-pulse opacity-40')}
       >
-        {!inProgress && (
-          <Button className='aspect-square min-w-0 p-0' disabled={!enableStart} onClick={start}>
-            <SquarePlay className='size-6' />
-          </Button>
-        )}
+        <div className='flex flex-col items-center gap-2 text-center text-xs text-slate-500 dark:text-slate-400'>
+          {rippingProgress.stepDetails && <div className='font-medium'>{rippingProgress.stepDetails}</div>}
 
-        {inProgress && (
-          <Button className='aspect-square min-w-0 p-0' disabled={!enableStart} onClick={cancel}>
-            <OctagonX className='size-6 animate-[spin_2s_linear_infinite]' />
-          </Button>
-        )}
+          {getCurrentProgress() > 0 && (
+            <div className='flex flex-wrap justify-center gap-1'>
+              <Badge variant='secondary' className='w-fit'>
+                {getCurrentProgress().toFixed(1)}%
+              </Badge>
+              {metadata?.type === 'tv_show' && (
+                <Badge variant='secondary' className='w-fit'>
+                  {rippingProgress.step + 1}/{selectedTitles.length}
+                </Badge>
+              )}
+            </div>
+          )}
+        </div>
       </RadialProgressBar>
       <RadialProgressBar
         progress={0}
         size={250}
         strokeWidth={20}
         ringClassName='text-neutral-900'
-        bgClassName='text-neutral-900 opacity-30'
+        bgClassName={cn('text-neutral-900 opacity-30', rippingInProgress && 'text-neutral-700 animate-pulse opacity-40')}
         className='absolute left-0 top-0 z-10 translate-x-[-25px] translate-y-[-25px]'
       >
         <div></div>
       </RadialProgressBar>
-      <div className='absolute -bottom-24 mt-8 text-center'>
-        <div className=' text-sm font-medium text-slate-500 dark:text-slate-400'>{rippingProgress.stepTitle}</div>
-        <div className='text-sm text-slate-500 dark:text-slate-400'>
-          <span>{rippingProgress.stepDetails}</span>
-          {rippingProgress.stepDetails && <span> ({(rippingProgress.progress * 100).toFixed(1)}%)</span>}
-        </div>
-      </div>
     </div>
   );
 };

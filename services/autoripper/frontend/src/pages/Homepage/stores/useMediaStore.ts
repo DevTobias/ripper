@@ -1,3 +1,4 @@
+import { WebSocketMessage } from 'react-use-websocket/dist/lib/types';
 import { z } from 'zod';
 import { create } from 'zustand';
 
@@ -30,22 +31,33 @@ export const metadataFormSchema = z
 
 export type MetadataFormValues = z.infer<typeof metadataFormSchema>;
 
+export type ProgressPayload = {
+  progress: number;
+  step: number;
+  stepTitle: string;
+  stepDetails: string;
+};
+
 type State = {
-  metadata?: MetadataFormValues;
+  metadata: MetadataFormValues | null;
   selectedTitles: string[];
+  rippingInProgress: boolean;
+  rippingProgress: ProgressPayload;
+  sendWebsocketMessage?: (message: WebSocketMessage, keep?: boolean | undefined) => void;
 };
 
 type Actions = {
   setMetadata: (mediaInfo: MetadataFormValues) => void;
-  setSelectedTitles: (selectedTitles: string[]) => void;
 };
 
 const defaultState: State = {
+  metadata: null,
   selectedTitles: [],
+  rippingInProgress: false,
+  rippingProgress: { progress: 0, step: 0, stepDetails: '', stepTitle: '' },
 };
 
 export const useMediaStore = create<State & Actions>()((set) => ({
   ...defaultState,
   setMetadata: (metadata) => set({ metadata }),
-  setSelectedTitles: (selectedTitles) => set({ selectedTitles }),
 }));

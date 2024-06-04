@@ -9,6 +9,7 @@ import { TvDetailsSchema } from '$/services/metadata/mapper/TvDetailsSchema';
 
 export type SearchResult = z.infer<typeof SearchMovieSchema>;
 export type SearchResultItem = z.infer<typeof SearchMovieSchema>['results'][0];
+export type Episode = z.infer<typeof TvDetailsSchema>['seasons'][0]['episodes'][0];
 
 export const searchMovieQuery = (payload: { query: string; lang: string; enabled?: boolean }) =>
   queryOptions({

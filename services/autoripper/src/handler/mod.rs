@@ -11,3 +11,4 @@ pub mod makemkv_handler;
 pub use makemkv_handler::get_devices_handler;
 pub use makemkv_handler::get_movie_titles_handler;
 pub use makemkv_handler::get_tv_show_titles_handler;
+pub use makemkv_handler::rip_movie_websocket_handler;
