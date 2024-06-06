@@ -1,5 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Save } from 'lucide-react';
+import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { useShallow } from 'zustand/react/shallow';
@@ -22,12 +23,18 @@ export const SettingsForm = () => {
 
   const form = useForm<z.infer<typeof metadataFormSchema>>({
     resolver: zodResolver(metadataFormSchema),
-    defaultValues: { device: '', preset: '', type: 'movie', selectedSeason: 1, selectedEpisodes: [] },
+    defaultValues: { device: '', profile: '', type: 'movie', selectedSeason: 1, selectedEpisodes: [] },
   });
 
   const onSubmit = (values: MetadataFormValues) => {
     setMetadata(values);
   };
+
+  useEffect(() => {
+    return useMediaStore.subscribe((state, prevState) => {
+      if (!state.metadata && prevState.metadata) form.reset();
+    });
+  }, [form]);
 
   return (
     <Form {...form}>

@@ -23,8 +23,8 @@ export const endpoints = {
 };
 
 export const endpointFactory = {
-  ripMovieWebsocket: (titles: string[], device: string) => {
-    const params = new URLSearchParams(Object.entries({ device }));
+  ripMovieWebsocket: (titles: string[], device: string, profile: string) => {
+    const params = new URLSearchParams(Object.entries({ device, profile }));
     titles.forEach((title) => params.append('titles', title));
     return `${RIP_MOVIE_WEB_SOCKET_ENDPOINT}?${params.toString()}`;
   },

@@ -26,7 +26,7 @@ export const EncodingPresetSelection: FC<Props> = ({ form }) => {
   return (
     <FormField
       control={form.control}
-      name='preset'
+      name='profile'
       render={({ field, fieldState }) => (
         <FormItem className='w-full'>
           <FormLabel className='flex items-center gap-1 text-sm'>
@@ -45,9 +45,9 @@ export const EncodingPresetSelection: FC<Props> = ({ form }) => {
               </div>
             </FormControl>
             <SelectContent>
-              {data?.map((preset) => (
-                <SelectItem key={preset.name} value={preset.name} className='cursor-pointer'>
-                  <span>{preset.label}</span>
+              {data?.map((profile) => (
+                <SelectItem key={profile.id} value={profile.id} className='cursor-pointer'>
+                  <span>{profile.label}</span>
                 </SelectItem>
               ))}
             </SelectContent>

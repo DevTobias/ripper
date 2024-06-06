@@ -5,7 +5,7 @@ import { create } from 'zustand';
 export const metadataFormSchema = z
   .object({
     device: z.string().min(1, { message: 'formErrors.required' }),
-    preset: z.string().min(1, { message: 'formErrors.required' }),
+    profile: z.string().min(1, { message: 'formErrors.required' }),
     type: z.enum(['movie', 'tv_show']),
     selectedSeason: z.number(),
     selectedEpisodes: z.array(z.number()),
@@ -32,10 +32,12 @@ export const metadataFormSchema = z
 export type MetadataFormValues = z.infer<typeof metadataFormSchema>;
 
 export type ProgressPayload = {
+  progressState: 'idle' | 'ripping' | 'encoding';
   progress: number;
   step: number;
   stepTitle: string;
   stepDetails: string;
+  eta: number;
 };
 
 type State = {
@@ -54,7 +56,7 @@ const defaultState: State = {
   metadata: null,
   selectedTitles: [],
   rippingInProgress: false,
-  rippingProgress: { progress: 0, step: 0, stepDetails: '', stepTitle: '' },
+  rippingProgress: { progress: 0, step: 0, eta: 0, stepDetails: '', stepTitle: '', progressState: 'idle' },
 };
 
 export const useMediaStore = create<State & Actions>()((set) => ({

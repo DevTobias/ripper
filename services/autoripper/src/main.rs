@@ -11,7 +11,9 @@ mod handler;
 
 #[derive(Debug, Clone)]
 struct AppState {
-    command: String,
+    encoding_profiles_path: String,
+    makemkv_command: String,
+    handbrake_command: String,
     output_dir: String,
     origin: String,
     tmdb_client: TmdbClient,
@@ -21,8 +23,10 @@ struct AppState {
 #[tokio::main]
 async fn main() {
     let state = AppState {
-        command: "/Applications/MakeMKV.app/Contents/MacOS/makemkvcon".to_string(),
+        makemkv_command: "/Applications/MakeMKV.app/Contents/MacOS/makemkvcon".to_string(),
+        handbrake_command: "/Applications/HandBrakeCLI".to_string(),
         output_dir: "/Users/tobias.kaerst/Documents/projects/ripper/.output".to_string(),
+        encoding_profiles_path: "/Users/tobias.kaerst/Documents/projects/ripper/.profiles".to_string(),
         origin: "http://localhost:5173".to_string(),
         tmdb_client: TmdbClient::new(std::env::var("TMDB_KEY").unwrap().as_str()),
         makemkv_mutex: Arc::new(Mutex::new(())),

@@ -1,6 +1,8 @@
-use axum::{http::StatusCode, response::IntoResponse, Json};
+use axum::{extract::State, http::StatusCode, response::IntoResponse, Json};
 
 use handbrake_core::get_encoding_profiles;
+
+use crate::AppState;
 
 /// Handles requests to retrieve encoding profiles.
 ///
@@ -15,6 +17,6 @@ use handbrake_core::get_encoding_profiles;
 ///
 /// This function does not currently handle any errors as the `get_encoding_profiles`
 /// function is expected to return valid data or panic.
-pub async fn get_encoding_profiles_handler() -> impl IntoResponse {
-    (StatusCode::OK, Json(get_encoding_profiles()))
+pub async fn get_encoding_profiles_handler(State(state): State<AppState>) -> impl IntoResponse {
+    (StatusCode::OK, Json(get_encoding_profiles(&state.encoding_profiles_path).unwrap()))
 }

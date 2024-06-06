@@ -4,8 +4,9 @@ use std::io::{BufRead, BufReader};
 use std::process::{Command, Stdio};
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{mpsc::Sender, Arc, Mutex};
+use tracing::info;
 
-use crate::parse_csv_line;
+use crate::{parse_csv_line, ProgressTracker};
 
 #[derive(Debug, Serialize)]
 pub struct ProgressPayload {
@@ -13,6 +14,7 @@ pub struct ProgressPayload {
     pub step_details: String,
     pub progress: f32,
     pub step: usize,
+    pub eta: f32,
 }
 
 const PRGT_PREFIX: &str = "PRGT:";
@@ -60,7 +62,8 @@ const PRGV_PREFIX: &str = "PRGV:";
 /// rip_titles(command, &makemkv_mutex, cancel_flag, sender, output_dir, device, ids)?;
 /// ```
 pub fn rip_titles(
-    command: &str, makemkv_mutex: &Arc<Mutex<()>>, cancel_flag: Arc<AtomicBool>, sender: Sender<(&str, Option<ProgressPayload>)>, output_dir: &str, device: &str, ids: &[usize],
+    command: &str, makemkv_mutex: &Arc<Mutex<()>>, cancel_flag: Arc<AtomicBool>, sender: Sender<(&str, Option<ProgressPayload>)>, output_dir: &str, device: &str,
+    ids: &[usize],
 ) -> Result<()> {
     let _lock = makemkv_mutex.lock().map_err(|e| anyhow!("failed to lock makemkv_mutex: {}", e))?;
 
@@ -76,11 +79,13 @@ pub fn rip_titles(
         let mut current_step = String::new();
         let mut current_step_details = String::new();
         let mut current_progress = 0.0;
+        let mut progress_tracker = ProgressTracker::new();
 
         for line in stdout.lines() {
             if cancel_flag.load(Ordering::Relaxed) {
                 process.kill()?;
-                anyhow::bail!("operation aborted");
+                info!("makemkv operation aborted");
+                return Ok(());
             }
 
             let line = line?;
@@ -97,13 +102,20 @@ pub fn rip_titles(
                     let curr: f32 = columns.get(1).context("missing current progress value")?.parse()?;
                     let total: f32 = columns.get(2).context("missing total progress value")?.parse()?;
                     current_progress = curr / total;
+                    progress_tracker.update(curr, total).unwrap();
                 }
                 _ => {}
             }
 
-            sender
-                .send(("progress", Some(ProgressPayload { step_title: current_step.to_owned(), step_details: current_step_details.to_owned(), progress: current_progress, step: i })))
-                .unwrap();
+            let payload = ProgressPayload {
+                step_title: current_step.to_owned(),
+                step_details: current_step_details.to_owned(),
+                progress: current_progress,
+                eta: progress_tracker.get_eta(),
+                step: i,
+            };
+
+            sender.send(("progress", Some(payload))).unwrap();
         }
     }
 
