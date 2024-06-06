@@ -3,7 +3,9 @@
 # Rust specific
 /target
 .output
+.prod
 
 # React specific
 node_modules
 dist
+.env.*

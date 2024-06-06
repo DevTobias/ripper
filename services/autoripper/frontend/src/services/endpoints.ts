@@ -1,9 +1,10 @@
-export const BASE_URL = 'http://192.168.178.47:3000/api';
+export const BASE_URL = import.meta.env.VITE_BACKEND_BASE_URL;
+export const WEBSOCKET_BASE_URL = import.meta.env.VITE_BACKEND_WEBSOCKET_BASE_URL;
 
 export const DEVICE_ENDPOINT = `${BASE_URL}/makemkv/devices`;
 export const MOVIE_DISC_PROPERTIES = `${BASE_URL}/makemkv/titles/movie`;
 export const TV_SHOW_DISC_PROPERTIES = `${BASE_URL}/makemkv/titles/tv`;
-export const RIP_MOVIE_WEB_SOCKET_ENDPOINT = `${BASE_URL}/makemkv/rip/movie/ws`;
+export const RIP_MOVIE_WEB_SOCKET_ENDPOINT = `${WEBSOCKET_BASE_URL}/makemkv/rip/movie/ws`;
 
 export const ENCODING_PRESETS_ENDPOINT = `${BASE_URL}/handbrake/encoding-presets`;
 

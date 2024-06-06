@@ -94,6 +94,7 @@ pub fn encode_files(
         let mut process = Command::new(command)
             .args(&["--json", "--input", file, "--output", output_file, "--preset-import-file", &profile.file_name, "-Z", &profile.preset_name])
             .stdout(Stdio::piped())
+            .stderr(Stdio::null())
             .spawn()
             .context("failed to spawn encoding process")?;
 

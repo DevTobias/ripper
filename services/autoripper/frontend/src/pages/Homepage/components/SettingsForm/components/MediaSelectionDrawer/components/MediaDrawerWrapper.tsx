@@ -59,6 +59,11 @@ export const MediaDrawerWrapper: FC<Props> = ({
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 autoFocus
+                onKeyUp={(e) => {
+                  if (e.key === 'Enter') {
+                    e.currentTarget.blur();
+                  }
+                }}
               />
             </FormControl>
             <FormDescription>{t('homepage.metadata.media.description')}</FormDescription>

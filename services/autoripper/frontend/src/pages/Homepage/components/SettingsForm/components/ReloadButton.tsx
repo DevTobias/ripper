@@ -23,7 +23,7 @@ export const ReloadButton: FC<Props> = ({ form }) => {
 
   const reloadDevices = () => {
     form.resetField('device');
-    form.resetField('preset');
+    form.resetField('profile');
     void presets.refetch();
     void devices.refetch();
   };

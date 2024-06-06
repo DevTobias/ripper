@@ -27,7 +27,7 @@ async fn main() {
         handbrake_command: "/Applications/HandBrakeCLI".to_string(),
         output_dir: "/Users/tobias.kaerst/Documents/projects/ripper/.output".to_string(),
         encoding_profiles_path: "/Users/tobias.kaerst/Documents/projects/ripper/.profiles".to_string(),
-        origin: "http://localhost:5173".to_string(),
+        origin: "http://192.168.178.47:5173".to_string(),
         tmdb_client: TmdbClient::new(std::env::var("TMDB_KEY").unwrap().as_str()),
         makemkv_mutex: Arc::new(Mutex::new(())),
     };
