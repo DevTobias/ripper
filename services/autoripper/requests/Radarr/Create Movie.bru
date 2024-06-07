@@ -1,0 +1,222 @@
+meta {
+  name: Create Movie
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{radarr_base_url}}/movie
+  body: json
+  auth: none
+}
+
+headers {
+  X-Api-Key: {{radarr_api_key}}
+}
+
+body:json {
+  {
+    "rootFolderPath": "/data/media/movies",
+    "monitored": true,
+    "qualityProfileId": 4,
+    "minimumAvailability": "announced",
+    "tags": [6],
+    
+    "title": "Shang-Chi and the Legend of the Ten Rings",
+    "originalTitle": "Shang-Chi and the Legend of the Ten Rings",
+    "originalLanguage": {
+      "id": 1,
+      "name": "English"
+    },
+    "alternateTitles": [
+      {
+        "sourceType": "tmdb",
+        "movieMetadataId": 0,
+        "title": "Шанґ Чі та Легенда Десяти Кілець"
+      },
+      {
+        "sourceType": "tmdb",
+        "movieMetadataId": 0,
+        "title": "Shang Chi y la leyenda de los diez anillos"
+      },
+      {
+        "sourceType": "tmdb",
+        "movieMetadataId": 0,
+        "title": "شانغ-چي وأسطورة الحلقات العشر"
+      },
+      {
+        "sourceType": "tmdb",
+        "movieMetadataId": 0,
+        "title": "Shang-Chi at ang Alamat ng Sampung Singsing"
+      },
+      {
+        "sourceType": "tmdb",
+        "movieMetadataId": 0,
+        "title": "شانج شي وأسطورة الخواتم العشرة"
+      },
+      {
+        "sourceType": "tmdb",
+        "movieMetadataId": 0,
+        "title": "Shang-Chi ja Kümne Rõnga legend"
+      },
+      {
+        "sourceType": "tmdb",
+        "movieMetadataId": 0,
+        "title": "Shang-Chi és a Tíz Gyűrű legendája"
+      },
+      {
+        "sourceType": "tmdb",
+        "movieMetadataId": 0,
+        "title": "शांग-ची एंड द लीजेंड ऑफ द टेन रिंग्स"
+      },
+      {
+        "sourceType": "tmdb",
+        "movieMetadataId": 0,
+        "title": "Shang-Chi e la leggenda dei Dieci Anelli"
+      },
+      {
+        "sourceType": "tmdb",
+        "movieMetadataId": 0,
+        "title": "شانغ-شي: ذا ليجيند اوف ذا 10 رينقز"
+      },
+      {
+        "sourceType": "tmdb",
+        "movieMetadataId": 0,
+        "title": "Šeng-Či i legenda o deset prstenova"
+      },
+      {
+        "sourceType": "tmdb",
+        "movieMetadataId": 0,
+        "title": "Shang-Chi E La Leggenda Dei Dieci Anelli"
+      },
+      {
+        "sourceType": "tmdb",
+        "movieMetadataId": 0,
+        "title": "Shan-Chi va o'n uzuk afsonasi"
+      },
+      {
+        "sourceType": "tmdb",
+        "movieMetadataId": 0,
+        "title": "Steamboat"
+      },
+      {
+        "sourceType": "tmdb",
+        "movieMetadataId": 0,
+        "title": "尚氣與十環幫傳奇"
+      },
+      {
+        "sourceType": "tmdb",
+        "movieMetadataId": 0,
+        "title": "尚气与十环传奇"
+      },
+      {
+        "sourceType": "tmdb",
+        "movieMetadataId": 0,
+        "title": "ชาง-ชี กับตำนานลับเท็นริงส์"
+      },
+      {
+        "sourceType": "tmdb",
+        "movieMetadataId": 0,
+        "title": "尚氣與十環傳奇"
+      },
+      {
+        "sourceType": "tmdb",
+        "movieMetadataId": 0,
+        "title": "Shang-Chi i legenda dziesięciu pierścieni"
+      },
+      {
+        "sourceType": "tmdb",
+        "movieMetadataId": 0,
+        "title": "Shang-Chi i legenda dziesięciu pierścieni - Shang-Chi and the Legend of the Ten Rings"
+      },
+      {
+        "sourceType": "tmdb",
+        "movieMetadataId": 0,
+        "title": "Marvel - Shang-Chi et la Légende des Dix Anneaux"
+      },
+      {
+        "sourceType": "tmdb",
+        "movieMetadataId": 0,
+        "title": "Shang-Chi: Huyền Thoại Thập Luân"
+      },
+      {
+        "sourceType": "tmdb",
+        "movieMetadataId": 0,
+        "title": "샹치와 텐 링즈의 전설"
+      },
+      {
+        "sourceType": "tmdb",
+        "movieMetadataId": 0,
+        "title": "שאנג-צ'י: ואגדת 10 הטבעות"
+      },
+      {
+        "sourceType": "tmdb",
+        "movieMetadataId": 0,
+        "title": "Shang-Chi y la leyenda de los diez anillos"
+      }
+    ],
+    "secondaryYearSourceId": 0,
+    "sortTitle": "shang chi legend ten rings",
+    "status": "released",
+    "overview": "Shang-Chi wurde von der terroristischen Geheimorganisation der Ten Rings seit frühster Kindheit zum Killer ausgebildet. Trotz dieses intensiven Martial-Arts-Trainings hat der junge Mann aber versucht, sich ein normales Leben in San Francisco aufzubauen.  Doch als er gerade glaubt, sein früheres Leben vielleicht wirklich hinter sich gelassen zu haben, holt die Vergangenheit ihn wieder ein. Zusammen mit seiner alten Kindheitsfreundin Katy wird er von seinem kriminellen Vater Wenwu in eine Welt gezogen, in der niemand irgendjemanden mit Samthandschuhen anfasst. Nur die zehn Ringe des Mandarin können das Blatt im Kampf gegen das Böse vielleicht noch wenden.",
+    "inCinemas": "2021-09-01T00:00:00Z",
+    "physicalRelease": "2021-11-18T00:00:00Z",
+    "digitalRelease": "2021-11-12T00:00:00Z",
+    "images": [
+      {
+        "coverType": "poster",
+        "remoteUrl": "https://image.tmdb.org/t/p/original/1BIoJGKbXjdFDAqUEiA2VHqkK1Z.jpg"
+      },
+      {
+        "coverType": "fanart",
+        "remoteUrl": "https://image.tmdb.org/t/p/original/cinER0ESG0eJ49kXlExM0MEWGxW.jpg"
+      }
+    ],
+    "website": "https://www.marvel.com/movies/shang-chi-and-the-legend-of-the-ten-rings",
+    "year": 2021,
+    "youTubeTrailerId": "8YjFbMbfXaQ",
+    "studio": "Marvel Studios",
+    "movieFileId": 0,
+    "isAvailable": true,
+    "folderName": "",
+    "runtime": 132,
+    "cleanTitle": "shangchilegendtenrings",
+    "imdbId": "tt9376612",
+    "tmdbId": 566525,
+    "titleSlug": "566525",
+    "certification": "12",
+    "genres": [
+      "Action",
+      "Adventure",
+      "Fantasy"
+    ],
+    "added": "0001-01-01T00:00:00Z",
+    "ratings": {
+      "imdb": {
+        "votes": 437387,
+        "value": 7.4,
+        "type": "user"
+      },
+      "tmdb": {
+        "votes": 9022,
+        "value": 7.559,
+        "type": "user"
+      },
+      "metacritic": {
+        "votes": 0,
+        "value": 71,
+        "type": "user"
+      },
+      "rottenTomatoes": {
+        "votes": 0,
+        "value": 91,
+        "type": "user"
+      }
+    },
+    "collection": {
+      "title": "Shang-Chi Collection",
+      "tmdbId": 912503
+    },
+    "popularity": 91.496
+  }
+}

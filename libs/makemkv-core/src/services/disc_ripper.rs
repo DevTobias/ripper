@@ -6,7 +6,7 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{mpsc::Sender, Arc, Mutex};
 use tracing::info;
 
-use crate::{parse_csv_line, ProgressTracker};
+use utils::{parse_csv_line, ProgressTracker};
 
 #[derive(Debug, Serialize)]
 pub struct ProgressPayload {

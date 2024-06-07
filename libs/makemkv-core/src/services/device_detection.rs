@@ -5,7 +5,7 @@ use std::process::{Command, Stdio};
 use std::sync::{Arc, Mutex};
 use tracing::info;
 
-use crate::parse_csv_line;
+use utils::parse_csv_line;
 
 #[derive(Debug, Default, Clone, Serialize)]
 pub struct Device {

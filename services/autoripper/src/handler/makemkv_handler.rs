@@ -255,6 +255,8 @@ pub async fn rip_movie_websocket_handler(Query(params): Query<RipPayload>, State
         let encode_output_dir = state.output_dir.clone();
         let encode_profile = profiles.iter().find(|p| p.id == params.profile).unwrap().clone();
 
+        let upload_cancel_flag = cancel_flag.clone();
+
         let ripped_titles = params
             .titles
             .iter()
@@ -301,6 +303,20 @@ pub async fn rip_movie_websocket_handler(Query(params): Query<RipPayload>, State
         }
 
         handle_handbrake_encoding(&mut socket_sender, encode_cancel_flag, encode_command, encode_output_dir, ripped_files, encode_profile).await;
+
+        if upload_cancel_flag.load(Ordering::Relaxed) {
+            return;
+        }
+
+        // let encoded_files = encode_titles
+        //     .iter()
+        //     .map(|title| {
+        //         let file = Path::new(&rip_output_dir).join(&title.output_file_name);
+        //         file.to_str().unwrap().to_string()
+        //     })
+        //     .collect::<Vec<String>>();
+
+        //
     }
 
     ws.on_upgrade(move |socket| handle_rip_socket(socket, state, params))

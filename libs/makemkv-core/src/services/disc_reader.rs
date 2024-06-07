@@ -5,7 +5,7 @@ use std::process::{Command, Stdio};
 use std::sync::{Arc, Mutex};
 use tracing::{error, info};
 
-use crate::{parse_csv_line, parse_duration_to_seconds};
+use utils::{parse_csv_line, parse_duration_to_seconds};
 
 #[derive(Debug, Default, Clone, Serialize)]
 pub struct Title {
@@ -181,7 +181,9 @@ pub fn read_disc_properties(command: &str, device: &str, makemkv_mutex: &Arc<Mut
         match columns.get(0).map(|s| s.as_str()) {
             Some(x) if x.starts_with(CINFO_PREFIX) => handle_cinfo(&mut disc, x, &columns).context("failed to handle cinfo")?,
             Some(x) if x.starts_with(TINFO_PREFIX) => handle_tinfo(&mut disc, x, &columns).context("failed to handle tinfo")?,
-            Some(x) if x.starts_with(SINFO_PREFIX) => handle_sinfo(&mut disc, &mut stream_type, &mut audio_stream_id, &mut subtitle_stream_id, x, &columns).context("failed to handle sinfo")?,
+            Some(x) if x.starts_with(SINFO_PREFIX) => {
+                handle_sinfo(&mut disc, &mut stream_type, &mut audio_stream_id, &mut subtitle_stream_id, x, &columns).context("failed to handle sinfo")?
+            }
             _ => {}
         }
     }

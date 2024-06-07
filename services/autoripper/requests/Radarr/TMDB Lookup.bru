@@ -1,0 +1,19 @@
+meta {
+  name: TMDB Lookup
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{radarr_base_url}}/movie/lookup/tmdb?tmdbId=566525
+  body: none
+  auth: none
+}
+
+query {
+  tmdbId: 566525
+}
+
+headers {
+  X-Api-Key: {{radarr_api_key}}
+}

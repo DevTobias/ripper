@@ -1,0 +1,19 @@
+meta {
+  name: Movie
+  type: http
+  seq: 6
+}
+
+get {
+  url: {{radarr_base_url}}/movie?tmdbid=566525
+  body: none
+  auth: none
+}
+
+query {
+  tmdbid: 566525
+}
+
+headers {
+  X-Api-Key: {{radarr_api_key}}
+}
