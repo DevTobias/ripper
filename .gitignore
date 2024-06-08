@@ -4,6 +4,7 @@
 /target
 .output
 .prod
+config.json
 
 # React specific
 node_modules

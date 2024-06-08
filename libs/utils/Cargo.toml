@@ -5,4 +5,5 @@ edition = "2021"
 
 [dependencies]
 anyhow = "1.0.86"
+ssh2 = "0.9.4"
 tracing = "0.1.40"

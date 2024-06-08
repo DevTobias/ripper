@@ -1,9 +1,15 @@
+use ssh2::Session;
 use std::fs::{self, File};
 use std::io::{self, Read, Write};
+use std::net::TcpStream;
 use std::path::Path;
-use std::sync::mpsc::Sender;
+use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::{mpsc::Sender, Arc};
+use tracing::{error, info};
 
-const BUFFER_SIZE: usize = 16384;
+use crate::ProgressTracker;
+
+const BUFFER_SIZE: usize = 128 * 1024;
 
 /// Moves a file from the source path to the destination path while reporting progress.
 ///
@@ -86,5 +92,126 @@ pub fn move_file_with_progress<P: AsRef<Path>>(source: P, destination: P, sender
 
     fs::remove_file(source)?;
 
+    Ok(())
+}
+
+#[derive(Debug)]
+pub struct UploadProgressPayload {
+    pub progress: f32,
+    pub eta: f32,
+    pub step: u32,
+}
+
+/// Uploads a file to a remote server using SFTP with progress updates.
+///
+/// This function connects to a remote server via SSH, authenticates using the provided
+/// credentials, and uploads a file from the local filesystem to the remote server. It
+/// sends progress updates through the provided channel.
+///
+/// # Arguments
+///
+/// * `local_path` - The path to the local file to be uploaded.
+/// * `remote_user` - The username for SSH authentication on the remote server.
+/// * `remote_host` - The hostname or IP address of the remote server.
+/// * `remote_path` - The path on the remote server where the file should be uploaded.
+/// * `password` - The password for SSH authentication on the remote server.
+/// * `sender` - A channel sender for sending progress updates as a percentage (0.0 to 100.0).
+///
+/// # Errors
+///
+/// This function returns an `io::Result` which can contain an error if:
+/// - The TCP connection to the remote server fails.
+/// - The SSH handshake fails.
+/// - Authentication fails.
+/// - The local file cannot be opened or read.
+/// - The remote file cannot be created or written to.
+///
+/// # Example
+///
+/// ```
+/// use std::sync::mpsc::channel;
+///
+/// fn main() {
+///     let local_path = "path/to/local/file";
+///     let remote_user = "username";
+///     let remote_host = "hostname";
+///     let remote_path = "path/to/remote/file";
+///     let password = "your_password";
+///
+///     let (tx, rx) = channel();
+///
+///     // Spawn a thread to handle the file upload
+///     std::thread::spawn(move || {
+///         if let Err(e) = upload_file_with_sftp(local_path, remote_user, remote_host, remote_path, password, tx) {
+///             eprintln!("Error: {}", e);
+///         }
+///     });
+///
+///     // Handle progress updates
+///     for progress in rx {
+///         println!("Progress: {:.2}%", progress);
+///     }
+/// }
+/// ```
+pub fn upload_file_with_sftp(
+    local_path: &str, remote_path: &str, file_id: u32, remote_host: &str, remote_user: &str, remote_password: &str, cancel_flag: &Arc<AtomicBool>,
+    sender: &Sender<(&str, Option<UploadProgressPayload>)>,
+) -> io::Result<()> {
+    let mut progress_tracker = ProgressTracker::new();
+
+    let tcp = TcpStream::connect(format!("{}:22", remote_host))?;
+
+    let mut session = Session::new().unwrap();
+    session.set_tcp_stream(tcp);
+    session.handshake()?;
+
+    session.userauth_password(remote_user, remote_password)?;
+
+    if !session.authenticated() {
+        return Err(io::Error::new(io::ErrorKind::Other, "Authentication failed"));
+    }
+
+    let mut file = File::open(&local_path)?;
+    let metadata = file.metadata()?;
+    let file_size = metadata.len();
+
+    let sftp = session.sftp()?;
+
+    let mut remote_file = sftp.create(&Path::new(remote_path))?;
+
+    let mut buffer = vec![0u8; BUFFER_SIZE];
+    let mut total_bytes_sent = 0;
+
+    loop {
+        if cancel_flag.load(Ordering::Relaxed) {
+            info!("uploading operation aborted");
+
+            if let Err(e) = sftp.unlink(&Path::new(remote_path)) {
+                error!("Failed to delete remote file: {}", e);
+            } else {
+                info!("Remote file deleted successfully");
+            }
+
+            return Ok(());
+        }
+
+        let bytes_read = match file.read(&mut buffer) {
+            Ok(0) => break,
+            Ok(len) => len,
+            Err(ref e) if e.kind() == io::ErrorKind::Interrupted => continue,
+            Err(e) => return Err(e),
+        };
+
+        remote_file.write_all(&buffer[..bytes_read])?;
+        total_bytes_sent += bytes_read as u64;
+
+        let progress = total_bytes_sent as f32 / file_size as f32;
+        progress_tracker.update(total_bytes_sent as f32, file_size as f32).unwrap();
+
+        let payload = UploadProgressPayload { progress, eta: progress_tracker.get_eta(), step: file_id };
+        sender.send(("progress", Some(payload))).unwrap();
+    }
+
+    sender.send(("done", None)).unwrap();
     Ok(())
 }

@@ -1,5 +1,9 @@
 use axum::http::{header, HeaderValue, Method};
 use axum::{routing::get, Router};
+use rarr_clients::RadarrClient;
+use serde::Deserialize;
+use std::fs::File;
+use std::io::Read;
 use std::sync::{Arc, Mutex};
 use std::{fmt::Debug, net::SocketAddr};
 use tmdb_client::TmdbClient;
@@ -9,27 +13,55 @@ use tracing::{info, Level};
 
 mod handler;
 
+#[derive(Debug, Clone, Deserialize)]
+struct Config {
+    makemkv_command: String,
+    handbrake_command: String,
+    output_dir: String,
+    encoding_profiles_path: String,
+    tmdb_key: String,
+    radarr_endpoint: String,
+    radarr_api_key: String,
+    origin: String,
+    remote_host: String,
+    remote_user: String,
+    remote_password: String,
+}
+
 #[derive(Debug, Clone)]
 struct AppState {
     encoding_profiles_path: String,
     makemkv_command: String,
     handbrake_command: String,
     output_dir: String,
-    origin: String,
     tmdb_client: TmdbClient,
     makemkv_mutex: Arc<Mutex<()>>,
+    radarr_client: RadarrClient,
+    remote_host: String,
+    remote_user: String,
+    remote_password: String,
 }
 
 #[tokio::main]
 async fn main() {
+    let mut contents = String::new();
+    File::open("config.json").unwrap().read_to_string(&mut contents).unwrap();
+    let config: Config = serde_json::from_str(&contents).unwrap();
+
     let state = AppState {
-        makemkv_command: "/Applications/MakeMKV.app/Contents/MacOS/makemkvcon".to_string(),
-        handbrake_command: "/Applications/HandBrakeCLI".to_string(),
-        output_dir: "/Users/tobias.kaerst/Documents/projects/ripper/.output".to_string(),
-        encoding_profiles_path: "/Users/tobias.kaerst/Documents/projects/ripper/.profiles".to_string(),
-        origin: "http://192.168.178.47:5173".to_string(),
-        tmdb_client: TmdbClient::new(std::env::var("TMDB_KEY").unwrap().as_str()),
+        makemkv_command: config.makemkv_command,
+        handbrake_command: config.handbrake_command,
+
+        output_dir: config.output_dir,
+        encoding_profiles_path: config.encoding_profiles_path,
+
         makemkv_mutex: Arc::new(Mutex::new(())),
+        tmdb_client: TmdbClient::new(&config.tmdb_key),
+        radarr_client: RadarrClient::new(&config.radarr_endpoint, &config.radarr_api_key),
+
+        remote_host: config.remote_host,
+        remote_user: config.remote_user,
+        remote_password: config.remote_password,
     };
 
     tracing_subscriber::fmt().with_target(false).with_max_level(Level::DEBUG).compact().init();
@@ -39,7 +71,7 @@ async fn main() {
         .on_request(DefaultOnRequest::new().level(Level::DEBUG));
 
     let cors = CorsLayer::new()
-        .allow_origin(state.origin.parse::<HeaderValue>().unwrap())
+        .allow_origin(config.origin.parse::<HeaderValue>().unwrap())
         .allow_methods([Method::GET, Method::POST])
         .allow_headers([header::CONTENT_TYPE, header::ACCEPT]);
 
@@ -55,13 +87,18 @@ async fn main() {
         .route("/devices", get(handler::get_devices_handler))
         .route("/titles/movie", get(handler::get_movie_titles_handler))
         .route("/titles/tv", get(handler::get_tv_show_titles_handler))
-        .route("/rip/movie/ws", get(handler::rip_movie_websocket_handler));
+        .route("/rip", get(handler::rip_websocket_handler));
+
+    let media_routes = Router::new()
+        .route("/quality-profiles", get(handler::get_quality_profile_handler))
+        .route("/root-folders", get(handler::get_root_folder_handler));
 
     let app = Router::new()
         .nest_service("/", ServeDir::new("./frontend/dist"))
         .nest("/api/tmdb", metadata_routes)
         .nest("/api/handbrake", handbrake_routes)
         .nest("/api/makemkv", makemkv_routes)
+        .nest("/api/management", media_routes)
         .layer(cors)
         .layer(trace_layer)
         .with_state(state);

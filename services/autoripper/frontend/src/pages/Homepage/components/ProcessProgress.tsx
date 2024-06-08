@@ -13,8 +13,7 @@ const WebsocketMessageSchema = z.object({
   type: z.string(),
   payload: z
     .object({
-      stepTitle: z.string(),
-      stepDetails: z.string(),
+      label: z.string(),
       progress: z.number(),
       step: z.number(),
       eta: z.number(),
@@ -31,31 +30,54 @@ export const ProcessProgress = () => {
   const selectedTitles = useMediaStore(useShallow((state) => state.selectedTitles));
 
   const handleWebsocketMessage = (message: WebsocketMessage) => {
-    if (message.type === 'ripping_progress' || message.type === 'encoding_progress') {
-      useMediaStore.setState({
-        rippingProgress: {
-          ...message.payload!,
-          progressState: message.type === 'ripping_progress' ? 'ripping' : 'encoding',
-        },
-      });
+    if (message.type === 'ripping_progress' || message.type === 'encoding_progress' || message.type === 'upload_progress') {
+      const getProgressState = () => {
+        if (message.type === 'ripping_progress') return 'ripping';
+        if (message.type === 'encoding_progress') return 'encoding';
+        if (message.type === 'upload_progress') return 'uploading';
+        return 'idle';
+      };
+
+      useMediaStore.setState({ rippingProgress: { ...message.payload!, progressState: getProgressState() } });
     }
 
     if (message.type === 'ripping_done') {
-      useMediaStore.setState({ rippingProgress: { ...useMediaStore.getState().rippingProgress, progressState: 'idle' } });
+      useMediaStore.setState({
+        rippingProgress: { ...useMediaStore.getState().rippingProgress, progressState: 'encoding' },
+      });
     }
 
     if (message.type === 'encoding_done') {
       useMediaStore.setState({
+        rippingProgress: { ...useMediaStore.getState().rippingProgress, progressState: 'uploading' },
+      });
+    }
+
+    if (message.type === 'uploading_done') {
+      useMediaStore.setState({
         selectedTitles: [],
         metadata: null,
         rippingInProgress: false,
-        rippingProgress: { progress: 0, step: 0, eta: 0, stepDetails: '', stepTitle: '', progressState: 'idle' },
+        rippingProgress: { progress: 0, step: 0, eta: 0, label: '', progressState: 'idle' },
       });
     }
   };
 
   const { sendMessage } = useWebSocket(
-    metadata ? endpointFactory.ripMovieWebsocket(selectedTitles, metadata.device, metadata.profile) : '',
+    metadata
+      ? endpointFactory.ripWebsocket({
+          titles: selectedTitles,
+          device: metadata.device,
+          profile: metadata.profile,
+          mediaType: metadata.type,
+          qualityProfile: metadata.qualityProfile,
+          rootFolder: metadata.rootFolder,
+          metadata:
+            metadata.type === 'movie'
+              ? { tmdb_id: metadata.selectedMedia.id }
+              : { tmdb_id: metadata.selectedMedia.id, season: metadata.selectedSeason, episodes: metadata.selectedEpisodes },
+        })
+      : '',
     { onMessage: (event) => handleWebsocketMessage(WebsocketMessageSchema.parse(JSON.parse(event.data as string))) },
     rippingInProgress && !!metadata && selectedTitles.length > 0
   );
@@ -64,15 +86,23 @@ export const ProcessProgress = () => {
     useMediaStore.getState().sendWebsocketMessage = sendMessage;
   }, [sendMessage]);
 
-  const getCurrentProgress = (type: 'ripping' | 'encoding' | 'any') => {
+  const getCurrentProgress = (type: 'ripping' | 'encoding' | 'uploading' | 'any') => {
     if (type === 'ripping') {
       if (rippingProgress.progressState === 'ripping') return rippingProgress.progress * 100;
       if (rippingProgress.progressState === 'encoding') return 100;
+      if (rippingProgress.progressState === 'uploading') return 100;
     }
 
     if (type === 'encoding') {
       if (rippingProgress.progressState === 'ripping') return 0;
       if (rippingProgress.progressState === 'encoding') return rippingProgress.progress * 100;
+      if (rippingProgress.progressState === 'uploading') return 100;
+    }
+
+    if (type === 'uploading') {
+      if (rippingProgress.progressState === 'ripping') return 0;
+      if (rippingProgress.progressState === 'encoding') return 0;
+      if (rippingProgress.progressState === 'uploading') return rippingProgress.progress * 100;
     }
 
     return rippingProgress.progress * 100;
@@ -88,7 +118,7 @@ export const ProcessProgress = () => {
         bgClassName={cn('text-neutral-900 opacity-30', rippingInProgress && 'text-neutral-700 animate-pulse opacity-40')}
       >
         <div className='flex flex-col items-center gap-2 text-center text-xs text-slate-500 dark:text-slate-400'>
-          {rippingProgress.stepDetails && <div className='font-medium'>{rippingProgress.stepDetails}</div>}
+          {rippingProgress.label && <div className='font-medium'>{rippingProgress.label}</div>}
 
           {getCurrentProgress('any') > 0 && (
             <div className='flex flex-wrap justify-center gap-1'>
@@ -116,6 +146,16 @@ export const ProcessProgress = () => {
         ringClassName='text-neutral-900'
         bgClassName={cn('text-neutral-900 opacity-30', rippingInProgress && 'text-neutral-700 animate-pulse opacity-40')}
         className='absolute left-0 top-0 z-10 translate-x-[-25px] translate-y-[-25px]'
+      >
+        <div></div>
+      </RadialProgressBar>
+      <RadialProgressBar
+        progress={getCurrentProgress('uploading')}
+        size={300}
+        strokeWidth={20}
+        ringClassName='text-neutral-900'
+        bgClassName={cn('text-neutral-900 opacity-30', rippingInProgress && 'text-neutral-700 animate-pulse opacity-40')}
+        className='absolute left-0 top-0 z-10 translate-x-[-50px] translate-y-[-50px]'
       >
         <div></div>
       </RadialProgressBar>

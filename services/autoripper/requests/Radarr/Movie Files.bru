@@ -1,17 +1,17 @@
 meta {
-  name: TMDB Lookup
+  name: Movie Files
   type: http
-  seq: 1
+  seq: 9
 }
 
 get {
-  url: {{radarr_base_url}}/movie/lookup/tmdb?tmdbid=566525
+  url: {{radarr_base_url}}/moviefile?movieId=103
   body: none
   auth: none
 }
 
 query {
-  tmdbid: 566525
+  movieId: 103
 }
 
 headers {

@@ -13,7 +13,15 @@ export const de = {
       },
       preset: {
         title: 'Kodierungsvoreinstellung',
-        placeholder: 'Wähle nun eine geeignete Kodierung aus',
+        placeholder: 'Wähle eine geeignete Kodierung aus',
+      },
+      qualityProfile: {
+        title: 'Qualitätsprofil',
+        placeholder: 'Wähle ein Qualitätsprofil aus',
+      },
+      rootFolder: {
+        title: 'Zielordner',
+        placeholder: 'Wähle einen Zielordner aus',
       },
       metadata: {
         title: 'Medien Informationen',

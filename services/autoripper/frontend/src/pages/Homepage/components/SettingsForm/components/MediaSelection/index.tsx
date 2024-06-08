@@ -1,5 +1,5 @@
 import { Search } from 'lucide-react';
-import { FC, ReactNode } from 'react';
+import { FC } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useShallow } from 'zustand/react/shallow';
 
@@ -15,10 +15,9 @@ import type { MetadataFormControl } from '$/pages/Homepage/components/SettingsFo
 
 interface Props {
   form: MetadataFormControl;
-  children?: ReactNode;
 }
 
-export const MediaSelection: FC<Props> = ({ children, form }) => {
+export const MediaSelection: FC<Props> = ({ form }) => {
   const { t } = useTranslation();
 
   const rippingInProgress = useMediaStore(useShallow((state) => state.rippingInProgress));
@@ -70,16 +69,15 @@ export const MediaSelection: FC<Props> = ({ children, form }) => {
                       <Search className='size-4' />
                     </Button>
                   </MediaSelectionDrawer>
-                  {children}
                 </div>
               )}
             />
           </div>
 
-          <TabsContent value='movie' tabIndex={-1}>
+          <TabsContent value='movie' tabIndex={-1} className='mt-5'>
             <MovieSelection form={form} />
           </TabsContent>
-          <TabsContent value='tv_show' tabIndex={-1}>
+          <TabsContent value='tv_show' tabIndex={-1} className='mt-5'>
             <SeriesSelection form={form} />
           </TabsContent>
         </Tabs>

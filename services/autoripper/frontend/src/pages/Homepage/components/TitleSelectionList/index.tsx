@@ -78,9 +78,8 @@ export const TitleSelectionList = () => {
         progress: 0,
         step: 0,
         eta: 0,
-        progressState: 'encoding',
-        stepDetails: 'Disc einlesen',
-        stepTitle: 'Lese Disc Daten',
+        progressState: 'ripping',
+        label: 'Disc einlesen',
       },
     });
   };
@@ -90,7 +89,7 @@ export const TitleSelectionList = () => {
     useMediaStore.setState({
       rippingInProgress: false,
       selectedTitles: [],
-      rippingProgress: { progress: 0, step: 0, eta: 0, progressState: 'idle', stepDetails: '', stepTitle: '' },
+      rippingProgress: { progress: 0, step: 0, eta: 0, progressState: 'idle', label: '' },
     });
   };
 

@@ -10,3 +10,4 @@ makemkv-core = { path = "libs/makemkv-core" }
 handbrake-core = { path = "libs/handbrake-core" }
 tmdb-client = { path = "libs/tmdb-client" }
 utils = { path = "libs/utils" }
+rarr-clients = { path = "libs/rarr-clients" }

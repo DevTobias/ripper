@@ -1,0 +1,15 @@
+meta {
+  name: Quality Profiles
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{base_url}}/api/management/quality-profiles?media_type=movie
+  body: none
+  auth: none
+}
+
+query {
+  media_type: movie
+}
