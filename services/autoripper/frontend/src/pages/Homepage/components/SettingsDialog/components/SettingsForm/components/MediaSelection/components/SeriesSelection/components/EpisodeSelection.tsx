@@ -3,10 +3,10 @@ import { FC } from 'react';
 import { Button } from '$/components/common/ui/button';
 import { FormControl, FormField, FormItem } from '$/components/common/ui/form';
 import { cn, repeat } from '$/lib/utils';
-import { LoadingSelectionButton } from '$/pages/Homepage/components/SettingsForm/components/LoadingSelectionButton';
+import { LoadingSelectionButton } from '$/pages/Homepage/components/SettingsDialog/components/SettingsForm/components/LoadingSelectionButton';
 import { Episode } from '$/services/metadata';
 
-import type { MetadataFormControl } from '$/pages/Homepage/components/SettingsForm';
+import type { MetadataFormControl } from '$/pages/Homepage/components/SettingsDialog/components/SettingsForm';
 
 interface Props {
   form: MetadataFormControl;

@@ -2,13 +2,13 @@ import { useQuery } from '@tanstack/react-query';
 import { FC } from 'react';
 
 import { cn } from '$/lib/utils';
-import { MediaCard } from '$/pages/Homepage/components/SettingsForm/components/MediaCard';
-import { EpisodeSelection } from '$/pages/Homepage/components/SettingsForm/components/MediaSelection/components/SeriesSelection/components/EpisodeSelection';
-import { SeasonSelection } from '$/pages/Homepage/components/SettingsForm/components/MediaSelection/components/SeriesSelection/components/SeasonSelection';
-import { LoadingMediaCard } from '$/pages/Homepage/components/SettingsForm/components/MediaSelectionDrawer/components/LoadingMediaCard';
+import { MediaCard } from '$/pages/Homepage/components/SettingsDialog/components/SettingsForm/components/MediaCard';
+import { EpisodeSelection } from '$/pages/Homepage/components/SettingsDialog/components/SettingsForm/components/MediaSelection/components/SeriesSelection/components/EpisodeSelection';
+import { SeasonSelection } from '$/pages/Homepage/components/SettingsDialog/components/SettingsForm/components/MediaSelection/components/SeriesSelection/components/SeasonSelection';
+import { LoadingMediaCard } from '$/pages/Homepage/components/SettingsDialog/components/SettingsForm/components/MediaSelectionDrawer/components/LoadingMediaCard';
 import { getTvDetailsQuery } from '$/services/metadata';
 
-import type { MetadataFormControl } from '$/pages/Homepage/components/SettingsForm';
+import type { MetadataFormControl } from '$/pages/Homepage/components/SettingsDialog/components/SettingsForm';
 
 interface Props {
   form: MetadataFormControl;

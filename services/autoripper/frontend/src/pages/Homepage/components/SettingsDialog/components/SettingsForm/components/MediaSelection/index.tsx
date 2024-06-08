@@ -6,12 +6,12 @@ import { useShallow } from 'zustand/react/shallow';
 import { Button } from '$/components/common/ui/button';
 import { FormField } from '$/components/common/ui/form';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '$/components/common/ui/tabs';
-import { MovieSelection } from '$/pages/Homepage/components/SettingsForm/components/MediaSelection/components/MovieSelection';
-import { SeriesSelection } from '$/pages/Homepage/components/SettingsForm/components/MediaSelection/components/SeriesSelection';
-import { MediaSelectionDrawer } from '$/pages/Homepage/components/SettingsForm/components/MediaSelectionDrawer';
+import { MovieSelection } from '$/pages/Homepage/components/SettingsDialog/components/SettingsForm/components/MediaSelection/components/MovieSelection';
+import { SeriesSelection } from '$/pages/Homepage/components/SettingsDialog/components/SettingsForm/components/MediaSelection/components/SeriesSelection';
+import { MediaSelectionDrawer } from '$/pages/Homepage/components/SettingsDialog/components/SettingsForm/components/MediaSelectionDrawer';
 import { useMediaStore } from '$/pages/Homepage/stores/useMediaStore';
 
-import type { MetadataFormControl } from '$/pages/Homepage/components/SettingsForm';
+import type { MetadataFormControl } from '$/pages/Homepage/components/SettingsDialog/components/SettingsForm';
 
 interface Props {
   form: MetadataFormControl;

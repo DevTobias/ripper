@@ -386,15 +386,15 @@ impl RippingHandler {
 
         self.handle_cancellation(socket_receiver).await;
 
-        // self.rip_titles(&mut socket_sender).await;
-        // if self.cancel_flag.load(Ordering::Relaxed) {
-        //     return;
-        // }
-        //
-        // self.encode_files(&mut socket_sender).await;
-        // if self.cancel_flag.load(Ordering::Relaxed) {
-        //     return;
-        // }
+        self.rip_titles(&mut socket_sender).await;
+        if self.cancel_flag.load(Ordering::Relaxed) {
+            return;
+        }
+
+        self.encode_files(&mut socket_sender).await;
+        if self.cancel_flag.load(Ordering::Relaxed) {
+            return;
+        }
 
         let mutex_socket_sender: Arc<Mutex<SplitSink<WebSocket, Message>>> = Arc::new(Mutex::new(socket_sender));
         self.upload_files(mutex_socket_sender).await;

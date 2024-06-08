@@ -1,17 +1,23 @@
 import { SquarePlus } from 'lucide-react';
+import { forwardRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useShallow } from 'zustand/react/shallow';
 
-import { MediaCard } from '$/pages/Homepage/components/SettingsForm/components/MediaCard';
+import { ButtonProps } from '$/components/common/ui/button';
+import { MediaCard } from '$/pages/Homepage/components/SettingsDialog/components/SettingsForm/components/MediaCard';
 import { useMediaStore } from '$/pages/Homepage/stores/useMediaStore';
 
-export const MediaSettingsCard = () => {
+export const MediaSettingsCard = forwardRef<HTMLButtonElement, ButtonProps>(function MediaSettingsCard(props, ref) {
   const { t } = useTranslation();
   const metadata = useMediaStore(useShallow((state) => state.metadata));
 
   if (!metadata) {
     return (
-      <div className='flex h-[90px] items-center overflow-hidden rounded-[4px] border text-left transition-colors hover:bg-slate-50'>
+      <button
+        {...props}
+        ref={ref}
+        className='flex h-[90px] items-center overflow-hidden rounded-[4px] border text-left transition-colors hover:bg-slate-50'
+      >
         <div className='aspect-[2/3] h-full border-r'>
           <div className='flex size-full items-center justify-center bg-slate-200 text-slate-600 dark:bg-slate-700 dark:text-slate-300'>
             <SquarePlus />
@@ -25,7 +31,7 @@ export const MediaSettingsCard = () => {
             {t('homepage.metadata.selectMetadataDescription')}
           </div>
         </div>
-      </div>
+      </button>
     );
   }
 
@@ -35,7 +41,9 @@ export const MediaSettingsCard = () => {
       mediaType={metadata.type}
       selectedSeason={metadata.selectedSeason}
       selectedEpisodes={metadata.selectedEpisodes}
-      disabled
+      showEditButton
+      ref={ref}
+      {...props}
     />
   );
-};
+});

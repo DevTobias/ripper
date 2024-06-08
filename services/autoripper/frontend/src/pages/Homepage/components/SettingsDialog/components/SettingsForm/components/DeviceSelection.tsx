@@ -7,34 +7,38 @@ import { FormControl, FormField, FormItem, FormLabel } from '$/components/common
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '$/components/common/ui/select';
 import { cn } from '$/lib/utils';
 import { useMediaStore } from '$/pages/Homepage/stores/useMediaStore';
-import { qualityProfileQuery } from '$/services/management';
+import { devicesQuery } from '$/services/devices';
 
-import type { MetadataFormControl } from '$/pages/Homepage/components/SettingsForm';
+import type { MetadataFormControl } from '$/pages/Homepage/components/SettingsDialog/components/SettingsForm';
 
 interface Props {
   form: MetadataFormControl;
 }
 
-export const QualityProfileSelection: FC<Props> = ({ form }) => {
+const prettifyDeviceName = (device: string) => {
+  return device.replace(/_/g, ' ').toLocaleLowerCase();
+};
+
+export const DeviceSelection: FC<Props> = ({ form }) => {
   const { t } = useTranslation();
-  const { data, isLoading, isRefetching } = useQuery(qualityProfileQuery({ media_type: form.getValues('type') }));
+  const { data, isLoading, isRefetching } = useQuery(devicesQuery);
 
   const rippingInProgress = useMediaStore(useShallow((state) => state.rippingInProgress));
 
   const loading = isLoading || isRefetching;
 
   useEffect(() => {
-    if ((data?.length ?? 0) > 0 && !form.getValues('qualityProfile')) form.setValue('qualityProfile', data![0].id);
+    if ((data?.length ?? 0) > 0 && !form.getValues('device')) form.setValue('device', data![0].path);
   }, [data, form]);
 
   return (
     <FormField
       control={form.control}
-      name='qualityProfile'
+      name='device'
       render={({ field, fieldState }) => (
         <FormItem className='w-full'>
           <FormLabel className='flex items-center gap-1 text-sm'>
-            <span>{t('homepage.qualityProfile.title')}</span>
+            <span>{t('homepage.device.label')}</span>
           </FormLabel>
           <Select disabled={loading || rippingInProgress} onValueChange={field.onChange} value={field.value}>
             <FormControl>
@@ -44,14 +48,17 @@ export const QualityProfileSelection: FC<Props> = ({ form }) => {
                   isLoading={loading}
                   ref={field.ref}
                 >
-                  <SelectValue placeholder={t('homepage.qualityProfile.placeholder')} />
+                  <SelectValue placeholder={t('homepage.device.placeholder')} />
                 </SelectTrigger>
               </div>
             </FormControl>
             <SelectContent>
-              {data?.map((profile) => (
-                <SelectItem key={profile.id} value={profile.id} className='cursor-pointer'>
-                  <span>{profile.name}</span>
+              {data?.map((device) => (
+                <SelectItem key={device.path} value={device.path} className='cursor-pointer'>
+                  <div className='flex items-center gap-2'>
+                    <span className='capitalize'>{prettifyDeviceName(device.name)}</span>
+                    <span className='text-xs text-neutral-500'>({device.path})</span>
+                  </div>
                 </SelectItem>
               ))}
             </SelectContent>

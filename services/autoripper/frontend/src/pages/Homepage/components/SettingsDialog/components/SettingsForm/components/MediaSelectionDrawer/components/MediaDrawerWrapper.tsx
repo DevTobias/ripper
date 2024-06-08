@@ -5,8 +5,8 @@ import { Drawer, DrawerClose, DrawerContent, DrawerHeader, DrawerTrigger } from 
 import { FormControl, FormDescription, FormItem, FormLabel, useFormField } from '$/components/common/ui/form';
 import { Input } from '$/components/common/ui/input';
 import { cn, repeat } from '$/lib/utils';
-import { MediaCard } from '$/pages/Homepage/components/SettingsForm/components/MediaCard';
-import { LoadingMediaCard } from '$/pages/Homepage/components/SettingsForm/components/MediaSelectionDrawer/components/LoadingMediaCard';
+import { MediaCard } from '$/pages/Homepage/components/SettingsDialog/components/SettingsForm/components/MediaCard';
+import { LoadingMediaCard } from '$/pages/Homepage/components/SettingsDialog/components/SettingsForm/components/MediaSelectionDrawer/components/LoadingMediaCard';
 import { SearchResult, SearchResultItem } from '$/services/metadata';
 
 interface Props {

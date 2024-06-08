@@ -3,9 +3,9 @@ import { FC } from 'react';
 import { Button } from '$/components/common/ui/button';
 import { FormControl, FormField, FormItem } from '$/components/common/ui/form';
 import { repeat } from '$/lib/utils';
-import { LoadingSelectionButton } from '$/pages/Homepage/components/SettingsForm/components/LoadingSelectionButton';
+import { LoadingSelectionButton } from '$/pages/Homepage/components/SettingsDialog/components/SettingsForm/components/LoadingSelectionButton';
 
-import type { MetadataFormControl } from '$/pages/Homepage/components/SettingsForm';
+import type { MetadataFormControl } from '$/pages/Homepage/components/SettingsDialog/components/SettingsForm';
 
 interface Props {
   form: MetadataFormControl;

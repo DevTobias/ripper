@@ -9,7 +9,7 @@ import { cn } from '$/lib/utils';
 import { useMediaStore } from '$/pages/Homepage/stores/useMediaStore';
 import { encodingPresetsQuery } from '$/services/presets';
 
-import type { MetadataFormControl } from '$/pages/Homepage/components/SettingsForm';
+import type { MetadataFormControl } from '$/pages/Homepage/components/SettingsDialog/components/SettingsForm';
 
 interface Props {
   form: MetadataFormControl;
