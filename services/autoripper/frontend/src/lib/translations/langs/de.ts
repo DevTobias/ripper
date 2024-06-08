@@ -26,7 +26,8 @@ export const de = {
       metadata: {
         title: 'Medien Informationen',
         saveMetadata: 'Metadaten speichern',
-        selectMetadata: 'Wähle die Metadaten für das Medium aus',
+        selectMetadataTitle: 'Fehlende Metadaten',
+        selectMetadataDescription: 'Wähle hier deine Laufwerke, Medieninhalte und Qualitätseinstellungen aus!',
         media: {
           movie: 'Film',
           tvShow: 'Serie',

@@ -10,7 +10,7 @@ export const LoadingMediaCard = ({ id }: { id: number }) => {
           <Skeleton className='max-w-[70%] truncate text-sm font-medium'>{randomText((id + 1) ** 2, 15, 30)}</Skeleton>
           <Skeleton className='text-sm'>11.11.1111</Skeleton>
         </div>
-        <Skeleton className='line-clamp-2 max-w-[90%] text-sm'>{randomText((id + 1) ** 3, 50, 65)}</Skeleton>
+        <Skeleton className='line-clamp-2 w-fit max-w-[90%] text-sm'>{randomText((id + 1) ** 3, 50, 65)}</Skeleton>
       </div>
     </div>
   );

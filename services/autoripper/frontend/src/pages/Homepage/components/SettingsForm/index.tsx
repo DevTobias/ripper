@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useEffect } from 'react';
+import { FC, ReactNode, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { useShallow } from 'zustand/react/shallow';
@@ -15,7 +15,11 @@ import type { UseFormReturn } from 'react-hook-form';
 
 export type MetadataFormControl = UseFormReturn<MetadataFormValues>;
 
-export const SettingsForm = () => {
+interface Props {
+  children: ReactNode;
+}
+
+export const SettingsForm: FC<Props> = ({ children }) => {
   const setMetadata = useMediaStore(useShallow((state) => state.setMetadata));
 
   const form = useForm<z.infer<typeof metadataFormSchema>>({
@@ -43,6 +47,8 @@ export const SettingsForm = () => {
         </div>
 
         <MediaSelection form={form} />
+
+        {children}
       </form>
     </Form>
   );
