@@ -1,0 +1,22 @@
+meta {
+  name: Scan Movie
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{radarr_base_url}}/command
+  body: json
+  auth: none
+}
+
+headers {
+  X-Api-Key: {{radarr_api_key}}
+}
+
+body:json {
+  {
+    "name": "RescanMovie",
+    "movieId": 111
+  }
+}

@@ -1,0 +1,27 @@
+meta {
+  name: Create Movie
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{radarr_base_url}}/movie
+  body: json
+  auth: none
+}
+
+headers {
+  X-Api-Key: {{radarr_api_key}}
+}
+
+body:json {
+  {
+    "title": "The Fall Guy",
+    "tmdbId": 746036,
+    "rootFolderPath": "/data/media/movies",
+    "monitored": true,
+    "qualityProfileId": 4,
+    "minimumAvailability": "announced",
+    "tags": [6]
+  }
+}

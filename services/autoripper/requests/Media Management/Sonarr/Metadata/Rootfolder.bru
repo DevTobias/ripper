@@ -1,0 +1,15 @@
+meta {
+  name: Rootfolder
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{sonarr_base_url}}/rootfolder
+  body: none
+  auth: none
+}
+
+headers {
+  X-Api-Key: {{sonarr_api_key}}
+}

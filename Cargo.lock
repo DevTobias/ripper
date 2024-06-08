@@ -1137,19 +1137,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "rarr-clients"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "futures",
- "reqwest",
- "serde",
- "serde_json",
- "tokio",
- "tracing",
-]
-
-[[package]]
 name = "redox_syscall"
 version = "0.2.16"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1256,9 +1243,9 @@ dependencies = [
  "handbrake-core",
  "headers",
  "makemkv-core",
- "rarr-clients",
  "serde",
  "serde_json",
+ "servarr-clients",
  "tmdb-client",
  "tokio",
  "tower",
@@ -1417,6 +1404,19 @@ dependencies = [
  "itoa",
  "ryu",
  "serde",
+]
+
+[[package]]
+name = "servarr-clients"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "futures",
+ "reqwest",
+ "serde",
+ "serde_json",
+ "tokio",
+ "tracing",
 ]
 
 [[package]]

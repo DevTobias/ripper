@@ -1,0 +1,31 @@
+meta {
+  name: Create TV Show
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{sonarr_base_url}}/series
+  body: json
+  auth: none
+}
+
+headers {
+  X-Api-Key: {{sonarr_api_key}}
+}
+
+body:json {
+  {
+    "title": "House of the Dragon",
+    "tvdbId": 371572,
+    "qualityProfileId": 4,
+    "rootFolderPath": "/data/media/tv",
+    "seriesType": "standard",
+    "tags": [10],
+    "seasonFolder": true,
+    "monitored": true,
+    "addOptions": {
+      "monitor": "all"
+    }
+  }
+}

@@ -1,0 +1,19 @@
+meta {
+  name: Rename Files
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{sonarr_base_url}}/rename?seriesId=86
+  body: none
+  auth: none
+}
+
+query {
+  seriesId: 86
+}
+
+headers {
+  X-Api-Key: {{sonarr_api_key}}
+}

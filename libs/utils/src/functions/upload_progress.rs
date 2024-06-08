@@ -5,6 +5,7 @@ use std::net::TcpStream;
 use std::path::Path;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{mpsc::Sender, Arc};
+use std::time::{Duration, Instant};
 use tracing::{error, info};
 
 use crate::ProgressTracker;
@@ -181,6 +182,7 @@ pub fn upload_file_with_sftp(
 
     let mut buffer = vec![0u8; BUFFER_SIZE];
     let mut total_bytes_sent = 0;
+    let mut last_update_time = Instant::now();
 
     loop {
         if cancel_flag.load(Ordering::Relaxed) {
@@ -208,8 +210,11 @@ pub fn upload_file_with_sftp(
         let progress = total_bytes_sent as f32 / file_size as f32;
         progress_tracker.update(total_bytes_sent as f32, file_size as f32).unwrap();
 
-        let payload = UploadProgressPayload { progress, eta: progress_tracker.get_eta(), step: file_id };
-        sender.send(("progress", Some(payload))).unwrap();
+        if last_update_time.elapsed() >= Duration::new(1, 0) {
+            let payload = UploadProgressPayload { progress, eta: progress_tracker.get_eta(), step: file_id };
+            sender.send(("progress", Some(payload))).unwrap();
+            last_update_time = Instant::now();
+        }
     }
 
     sender.send(("done", None)).unwrap();

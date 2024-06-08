@@ -261,7 +261,7 @@ fn handle_sinfo(disc: &mut Disc, stream_type: &mut StreamType, audio_stream_id: 
                 *stream_type = StreamType::Audio;
                 *audio_stream_id += 1;
             }
-            "Subtitles" => {
+            "Subtitles" | "Untertitel" => {
                 *stream_type = StreamType::Subtitle;
                 *subtitle_stream_id += 1;
             }

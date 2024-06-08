@@ -12,7 +12,7 @@ pub struct MediaTypePayload {
 
 pub async fn get_quality_profile_handler(State(state): State<AppState>, Query(params): Query<MediaTypePayload>) -> impl IntoResponse {
     if params.media_type == "movie" {
-        let profiles = state.radarr_client.get_quality_profiles().await.unwrap();
+        let profiles = state.radarr_client.client.get_quality_profiles().await.unwrap();
         return (StatusCode::OK, Json(profiles)).into_response();
     }
 
@@ -21,7 +21,7 @@ pub async fn get_quality_profile_handler(State(state): State<AppState>, Query(pa
 
 pub async fn get_root_folder_handler(State(state): State<AppState>, Query(params): Query<MediaTypePayload>) -> impl IntoResponse {
     if params.media_type == "movie" {
-        let profiles = state.radarr_client.get_root_folders().await.unwrap();
+        let profiles = state.radarr_client.client.get_root_folders().await.unwrap();
         return (StatusCode::OK, Json(profiles)).into_response();
     }
 

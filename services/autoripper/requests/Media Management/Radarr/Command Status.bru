@@ -1,0 +1,22 @@
+meta {
+  name: Command Status
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{radarr_base_url}}/command/556988
+  body: none
+  auth: none
+}
+
+headers {
+  X-Api-Key: {{radarr_api_key}}
+}
+
+body:json {
+  {
+    "name": "RescanMovie",
+    "movieId": 100
+  }
+}

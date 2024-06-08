@@ -1,0 +1,22 @@
+meta {
+  name: Scan TV Show
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{sonarr_base_url}}/command
+  body: json
+  auth: none
+}
+
+headers {
+  X-Api-Key: {{sonarr_api_key}}
+}
+
+body:json {
+  {
+    "name": "RefreshSeries",
+    "seriesId": 86
+  }
+}

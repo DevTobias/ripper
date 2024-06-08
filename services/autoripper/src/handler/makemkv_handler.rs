@@ -156,6 +156,7 @@ pub struct RipPayload {
 #[derive(Deserialize, Clone, Debug)]
 pub struct RipMovieMetadata {
     pub tmdb_id: u32,
+    pub title: String,
 }
 
 struct RippingHandler {
@@ -331,7 +332,10 @@ impl RippingHandler {
                 for (i, file) in files.iter().enumerate() {
                     info!("Uploading movie: {}", file);
 
-                    let movie = radarr_client.create_movie(metadata.tmdb_id, quality_profile_id, &root_folder).await.unwrap();
+                    let movie = radarr_client
+                        .create_movie(metadata.tmdb_id, &metadata.title, quality_profile_id, &root_folder)
+                        .await
+                        .unwrap();
 
                     let local_file_name = Path::new(&file).file_name().unwrap().to_string_lossy().to_string();
                     let remote_path = Path::new(&movie.path).join(format!("[Bluray-1080p]_{}", local_file_name));

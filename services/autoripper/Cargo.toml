@@ -8,7 +8,7 @@ makemkv-core = { workspace = true }
 handbrake-core = { workspace = true }
 tmdb-client = { workspace = true }
 utils = { workspace = true }
-rarr-clients = { workspace = true }
+servarr-clients = { workspace = true }
 
 serde = {version = "1.0.202", features = ["derive"]}
 serde_json = "1.0.117"

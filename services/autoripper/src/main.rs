@@ -1,7 +1,7 @@
 use axum::http::{header, HeaderValue, Method};
 use axum::{routing::get, Router};
-use rarr_clients::RadarrClient;
 use serde::Deserialize;
+use servarr_clients::{JellyfinClient, RadarrClient, SonarrClient};
 use std::fs::File;
 use std::io::Read;
 use std::sync::{Arc, Mutex};
@@ -22,6 +22,10 @@ struct Config {
     tmdb_key: String,
     radarr_endpoint: String,
     radarr_api_key: String,
+    sonarr_endpoint: String,
+    sonarr_api_key: String,
+    jellyfin_endpoint: String,
+    jellyfin_api_key: String,
     origin: String,
     remote_host: String,
     remote_user: String,
@@ -37,6 +41,8 @@ struct AppState {
     tmdb_client: TmdbClient,
     makemkv_mutex: Arc<Mutex<()>>,
     radarr_client: RadarrClient,
+    sonarr_client: SonarrClient,
+    jellyfin_client: JellyfinClient,
     remote_host: String,
     remote_user: String,
     remote_password: String,
@@ -56,8 +62,11 @@ async fn main() {
         encoding_profiles_path: config.encoding_profiles_path,
 
         makemkv_mutex: Arc::new(Mutex::new(())),
+
         tmdb_client: TmdbClient::new(&config.tmdb_key),
         radarr_client: RadarrClient::new(&config.radarr_endpoint, &config.radarr_api_key),
+        sonarr_client: SonarrClient::new(&config.sonarr_endpoint, &config.sonarr_api_key),
+        jellyfin_client: JellyfinClient::new(&config.jellyfin_endpoint, &config.jellyfin_api_key),
 
         remote_host: config.remote_host,
         remote_user: config.remote_user,
@@ -92,6 +101,19 @@ async fn main() {
     let media_routes = Router::new()
         .route("/quality-profiles", get(handler::get_quality_profile_handler))
         .route("/root-folders", get(handler::get_root_folder_handler));
+
+    // state.radarr_client.create_movie(746036, "The Fall Guy", 4, "/data/media/movies").await.ok();
+    // state.radarr_client.scan_rename_movie(113).await.ok();
+
+    // state.jellyfin_client.library_scan().await.ok();
+
+    // state
+    //     .sonarr_client
+    //     .create_tv_show(371572, "House of the Dragon", "standard", 4, "/data/media/tv")
+    //     .await
+    //     .ok();
+    // Create Season 01 folder -> Upload [Bluray-1080p]_S01E02 Sample 1920x1080.mkv files
+    // state.sonarr_client.scan_rename_tv_show(91).await.ok();
 
     let app = Router::new()
         .nest_service("/", ServeDir::new("./frontend/dist"))

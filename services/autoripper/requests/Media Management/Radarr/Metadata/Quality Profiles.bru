@@ -1,0 +1,15 @@
+meta {
+  name: Quality Profiles
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{radarr_base_url}}/qualityprofile
+  body: none
+  auth: none
+}
+
+headers {
+  X-Api-Key: {{radarr_api_key}}
+}

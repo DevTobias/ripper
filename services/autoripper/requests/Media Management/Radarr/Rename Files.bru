@@ -1,0 +1,21 @@
+meta {
+  name: Rename Files
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{radarr_base_url}}/rename?movieId=111
+
+  body: none
+  auth: none
+}
+
+query {
+  movieId: 111
+  
+}
+
+headers {
+  X-Api-Key: {{radarr_api_key}}
+}

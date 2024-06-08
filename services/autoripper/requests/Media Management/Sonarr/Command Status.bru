@@ -1,0 +1,15 @@
+meta {
+  name: Command Status
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{sonarr_base_url}}/command/563308
+  body: none
+  auth: none
+}
+
+headers {
+  X-Api-Key: {{sonarr_api_key}}
+}
