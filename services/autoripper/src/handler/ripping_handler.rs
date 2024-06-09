@@ -2,12 +2,11 @@ use anyhow::Context;
 use axum::extract::ws::{Message, WebSocket};
 use axum::extract::State;
 use axum::extract::WebSocketUpgrade;
-use axum::{http::StatusCode, response::IntoResponse, Json};
+use axum::response::IntoResponse;
 use axum_extra::extract::Query;
 use futures::stream::{SplitSink, SplitStream};
 use futures::{sink::SinkExt, stream::StreamExt};
 use serde::Deserialize;
-use serde_json::json;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{mpsc, Arc};
 use std::{path::Path, thread};
@@ -18,129 +17,9 @@ use utils::{upload_file_with_sftp, UploadProgressPayload};
 
 use handbrake_core::{encode_files, get_encoding_profiles, EncodingProgressPayload, Profile};
 use makemkv_core::ProgressPayload;
-use makemkv_core::{detect_devices, filter_movie_main_features, filter_tv_series_main_features, read_disc_properties, rip_titles, Title};
+use makemkv_core::{read_disc_properties, rip_titles, Title};
 
 use crate::AppState;
-
-#[derive(Deserialize, Debug)]
-pub struct MovieTitlesPayload {
-    langs: Vec<String>,
-    tmdb_id: u32,
-    device: String,
-}
-
-#[derive(Deserialize, Debug)]
-pub struct TvShowTitlesPayload {
-    langs: Vec<String>,
-    tmdb_id: u32,
-    device: String,
-    season: u16,
-    episodes: Vec<u32>,
-}
-
-/// Handles requests to retrieve a list of devices.
-///
-/// This handler fetches the available devices using the `detect_devices`
-/// function from the `makemkv_core` module and returns them as a JSON response.
-///
-/// # Arguments
-///
-/// * `state` - The application state containing the command and MakeMKV mutex.
-///
-/// # Returns
-///
-/// A JSON response containing the list of detected devices or an error response if detection fails.
-///
-/// # Errors
-///
-/// Returns an `AppError` if the device detection fails.
-/// ```
-pub async fn get_devices_handler(State(state): State<AppState>) -> impl IntoResponse {
-    match detect_devices(&state.makemkv_command, &state.makemkv_mutex) {
-        Ok(devices) => (StatusCode::OK, Json(devices)).into_response(),
-        Err(err) => {
-            error!("Failed to detect devices: {}", err);
-            (StatusCode::INTERNAL_SERVER_ERROR, Json(json!({ "error": "failed to detect devices" }))).into_response()
-        }
-    }
-}
-
-/// Handles requests to retrieve disc titles and filter them based on the specified parameters.
-///
-/// This handler reads the disc properties and applies filters based on the provided
-/// `disc_type` and `langs`. It then returns the filtered disc titles as a JSON response.
-///
-/// # Arguments
-///
-/// * `state` - The application state containing the necessary dependencies.
-/// * `params` - The query parameters containing the device, disc type, TMDB ID, and languages.
-///
-/// # Returns
-///
-/// A JSON response containing the filtered disc titles or an error response if the operation fails.
-///
-/// # Errors
-///
-/// Returns an `AppError` if reading disc properties or filtering the titles fails.
-/// ```
-pub async fn get_movie_titles_handler(State(state): State<AppState>, Query(params): Query<MovieTitlesPayload>) -> impl IntoResponse {
-    match read_disc_properties(&state.makemkv_command, &params.device, &state.makemkv_mutex) {
-        Ok(disc) => {
-            let langs: Vec<&str> = params.langs.iter().map(|lang| lang.as_str()).collect();
-
-            match filter_movie_main_features(disc, &langs, params.tmdb_id, &state.tmdb_client).await {
-                Ok(filtered_disc) => (StatusCode::OK, Json(filtered_disc)).into_response(),
-                Err(err) => {
-                    error!("failed to filter movie main features: {}", err);
-                    (StatusCode::INTERNAL_SERVER_ERROR, Json(json!({ "error": "ailed to filter movie main features" }))).into_response()
-                }
-            }
-        }
-        Err(err) => {
-            error!("failed to read disc properties: {}", err);
-            (StatusCode::INTERNAL_SERVER_ERROR, Json(json!({ "error": "failed to read disc properties" }))).into_response()
-        }
-    }
-}
-
-/// Handles requests to retrieve TV show titles and filter them based on the specified parameters.
-///
-/// This handler reads the disc properties and applies filters based on the provided
-/// `langs`, `season`, and `episodes`. It then returns the filtered TV show titles as a JSON response.
-///
-/// # Arguments
-///
-/// * `state` - The application state containing the necessary dependencies.
-/// * `params` - The query parameters containing the device, TMDB ID, season, episodes, and languages.
-///
-/// # Returns
-///
-/// A JSON response containing the filtered TV show titles or an error response if the operation fails.
-///
-/// # Errors
-///
-/// Returns an `AppError` if reading disc properties or filtering the titles fails.
-/// ```
-pub async fn get_tv_show_titles_handler(State(state): State<AppState>, Query(params): Query<TvShowTitlesPayload>) -> impl IntoResponse {
-    match read_disc_properties(&state.makemkv_command, &params.device, &state.makemkv_mutex) {
-        Ok(disc) => {
-            let langs: Vec<&str> = params.langs.iter().map(|lang| lang.as_str()).collect();
-            let episodes: Vec<u16> = params.episodes.iter().map(|&e| e as u16).collect();
-
-            match filter_tv_series_main_features(disc, &langs, params.season, &episodes, params.tmdb_id, &state.tmdb_client).await {
-                Ok(filtered_disc) => (StatusCode::OK, Json(filtered_disc)).into_response(),
-                Err(err) => {
-                    error!("failed to filter tv show main features: {}", err);
-                    (StatusCode::INTERNAL_SERVER_ERROR, Json(json!({ "error": "ailed to filter tv show main features" }))).into_response()
-                }
-            }
-        }
-        Err(err) => {
-            error!("failed to read disc properties: {}", err);
-            (StatusCode::INTERNAL_SERVER_ERROR, Json(json!({ "error": "failed to read disc properties" }))).into_response()
-        }
-    }
-}
 
 #[derive(Deserialize, Clone, Debug)]
 pub struct RipPayload {
@@ -159,6 +38,15 @@ pub struct RipMovieMetadata {
     pub title: String,
 }
 
+#[derive(Deserialize, Clone, Debug)]
+pub struct RipTvShowMetadata {
+    pub tvdb_id: u32,
+    pub title: String,
+    pub series_type: String,
+    pub season: u32,
+    pub episodes: Vec<u32>,
+}
+
 struct RippingHandler {
     cancel_flag: Arc<AtomicBool>,
     state: AppState,
@@ -168,6 +56,19 @@ struct RippingHandler {
 }
 
 impl RippingHandler {
+    /// Creates a new instance of `RippingHandler`.
+    ///
+    /// This function initializes the `RippingHandler` by reading encoding profiles,
+    /// disc properties, and selecting the titles to be processed.
+    ///
+    /// # Arguments
+    ///
+    /// * `state` - The application state containing various configurations and clients.
+    /// * `params` - Parameters for ripping, including device and titles to be processed.
+    ///
+    /// # Returns
+    ///
+    /// A new instance of `RippingHandler`.
     pub fn new(state: AppState, params: RipPayload) -> Self {
         let profiles = get_encoding_profiles(&state.encoding_profiles_path).unwrap();
 
@@ -184,6 +85,15 @@ impl RippingHandler {
         Self { state, params, titles, profiles, cancel_flag: Arc::new(AtomicBool::new(false)) }
     }
 
+    /// Handles cancellation of the ripping process via WebSocket.
+    ///
+    /// This function listens for "cancel" messages over the WebSocket connection and
+    /// sets the cancellation flag. It also removes any partially processed files upon
+    /// cancellation.
+    ///
+    /// # Arguments
+    ///
+    /// * `socket_receiver` - A stream of incoming WebSocket messages.
     pub async fn handle_cancellation(&self, mut socket_receiver: SplitStream<WebSocket>) {
         let cancel_flag = self.cancel_flag.clone();
         let titles = self.titles.clone();
@@ -214,6 +124,14 @@ impl RippingHandler {
         });
     }
 
+    /// Rips the selected titles from the disc.
+    ///
+    /// This function spawns a new thread to handle the ripping process and sends
+    /// progress updates over the WebSocket connection.
+    ///
+    /// # Arguments
+    ///
+    /// * `socket_sender` - A mutable reference to the WebSocket sender for sending messages.
     pub async fn rip_titles(&self, socket_sender: &mut SplitSink<WebSocket, Message>) {
         let (rip_sender, rip_receiver) = mpsc::channel::<(&str, Option<ProgressPayload>)>();
 
@@ -253,6 +171,14 @@ impl RippingHandler {
         }
     }
 
+    /// Encodes the ripped files using the specified encoding profile.
+    ///
+    /// This function spawns a new thread to handle the encoding process and sends
+    /// progress updates over the WebSocket connection.
+    ///
+    /// # Arguments
+    ///
+    /// * `socket_sender` - A mutable reference to the WebSocket sender for sending messages.
     pub async fn encode_files(&self, socket_sender: &mut SplitSink<WebSocket, Message>) {
         let (encoding_sender, encoding_receiver) = mpsc::channel::<(&str, Option<EncodingProgressPayload>)>();
 
@@ -298,6 +224,14 @@ impl RippingHandler {
         }
     }
 
+    /// Uploads the encoded files to the specified remote server.
+    ///
+    /// This function spawns a new task to handle the file upload process and sends
+    /// progress updates over the WebSocket connection.
+    ///
+    /// # Arguments
+    ///
+    /// * `socket_sender` - A shared and mutable reference to the WebSocket sender for sending messages.
     pub async fn upload_files(&self, socket_sender: Arc<Mutex<SplitSink<WebSocket, Message>>>) {
         let (upload_sender, upload_receiver) = mpsc::channel::<(&str, Option<UploadProgressPayload>)>();
 
@@ -319,6 +253,8 @@ impl RippingHandler {
         let metadata = self.params.metadata.clone();
         let media_type = self.params.media_type.clone();
         let radarr_client = self.state.radarr_client.clone();
+        let sonarr_client = self.state.sonarr_client.clone();
+        let jellyfin_client = self.state.jellyfin_client.clone();
         let quality_profile_id = self.params.quality_profile.clone();
         let root_folder = self.params.root_folder.clone();
         let remote_host = self.state.remote_host.clone();
@@ -329,26 +265,54 @@ impl RippingHandler {
             if media_type == "movie" {
                 let metadata = serde_json::from_str::<RipMovieMetadata>(&metadata).unwrap();
 
+                let file = files.first().unwrap();
+
+                info!("Uploading movie: {}", file);
+
+                let movie = radarr_client
+                    .create_movie(metadata.tmdb_id, &metadata.title, quality_profile_id, &root_folder)
+                    .await
+                    .unwrap();
+
+                let local_file_name = Path::new(&file).file_name().unwrap().to_string_lossy().to_string();
+                let remote_path = Path::new(&movie.path).join(format!("[Bluray-1080p]_{}", local_file_name));
+
+                if let Err(e) = upload_file_with_sftp(&file, remote_path.to_str().unwrap(), 0, &remote_host, &remote_user, &remote_password, &cancel_flag, &upload_sender)
+                {
+                    error!("failed to upload file: {:?}", e);
+                }
+
+                radarr_client.scan_rename_movie(movie.id).await.ok();
+            }
+
+            if media_type == "tv_show" {
+                let metadata = serde_json::from_str::<RipTvShowMetadata>(&metadata).unwrap();
+
+                let tv_show = sonarr_client
+                    .create_tv_show(metadata.tvdb_id, &metadata.title, &metadata.series_type, quality_profile_id, &root_folder)
+                    .await
+                    .unwrap();
+
                 for (i, file) in files.iter().enumerate() {
-                    info!("Uploading movie: {}", file);
+                    info!("Uploading TV show: {}", file);
 
-                    let movie = radarr_client
-                        .create_movie(metadata.tmdb_id, &metadata.title, quality_profile_id, &root_folder)
-                        .await
-                        .unwrap();
-
-                    let local_file_name = Path::new(&file).file_name().unwrap().to_string_lossy().to_string();
-                    let remote_path = Path::new(&movie.path).join(format!("[Bluray-1080p]_{}", local_file_name));
+                    let season_path = Path::new(&tv_show.path).join(format!("Season {:0>2}", metadata.season));
+                    let file_name = Path::new(&file).file_name().unwrap().to_string_lossy().to_string();
+                    let prefixed_file_name = format!("[Bluray-1080p]_S{:0>2}E{:0>2}_{}", metadata.season, metadata.episodes[i], file_name);
+                    let remote_path = season_path.join(prefixed_file_name);
 
                     if let Err(e) =
                         upload_file_with_sftp(&file, remote_path.to_str().unwrap(), i as u32, &remote_host, &remote_user, &remote_password, &cancel_flag, &upload_sender)
                     {
                         error!("failed to upload file: {:?}", e);
                     }
-
-                    radarr_client.scan_rename_movie(movie.id).await.unwrap();
                 }
+
+                sonarr_client.scan_rename_tv_show(tv_show.id).await.ok();
             }
+
+            jellyfin_client.library_scan().await.ok();
+            upload_sender.send(("done", None)).unwrap();
         });
 
         let receiver_handle = tokio::spawn(async move {
@@ -385,6 +349,14 @@ impl RippingHandler {
         }
     }
 
+    /// Handles the entire ripping process from ripping to uploading files.
+    ///
+    /// This function coordinates the cancellation, ripping, encoding, and uploading
+    /// processes, and sends updates over the WebSocket connection.
+    ///
+    /// # Arguments
+    ///
+    /// * `socket` - The WebSocket connection for sending and receiving messages.
     pub async fn handle(self, socket: WebSocket) {
         let (mut socket_sender, socket_receiver) = socket.split();
 

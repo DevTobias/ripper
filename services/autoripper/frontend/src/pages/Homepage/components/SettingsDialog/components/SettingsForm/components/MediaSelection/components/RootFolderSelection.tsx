@@ -17,15 +17,17 @@ interface Props {
 
 export const RootFolderSelection: FC<Props> = ({ form }) => {
   const { t } = useTranslation();
-  const { data, isLoading, isRefetching } = useQuery(rootFoldersQuery({ media_type: form.getValues('type') }));
+
+  const type = form.watch('type');
+  const { data, isLoading, isRefetching } = useQuery(rootFoldersQuery({ media_type: type }));
 
   const rippingInProgress = useMediaStore(useShallow((state) => state.rippingInProgress));
 
   const loading = isLoading || isRefetching;
 
   useEffect(() => {
-    if ((data?.length ?? 0) > 0 && !form.getValues('rootFolder')) form.setValue('rootFolder', data![0].path);
-  }, [data, form]);
+    if ((data?.length ?? 0) > 0) form.setValue('rootFolder', data![0].path);
+  }, [data, form, type]);
 
   return (
     <FormField

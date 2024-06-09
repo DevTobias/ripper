@@ -17,8 +17,15 @@ pub struct TvSeries {
     pub number_of_episodes: u32,
     pub number_of_seasons: u32,
     pub last_episode_to_air: Episode,
+    pub external_ids: ExternalIds,
     #[serde(skip_deserializing)]
     pub seasons: Vec<TvSeason>,
+}
+
+#[derive(Deserialize, Serialize, Debug, Clone)]
+pub struct ExternalIds {
+    pub imdb_id: String,
+    pub tvdb_id: u32,
 }
 
 #[derive(Deserialize, Serialize, Debug, Clone)]

@@ -1,8 +1,8 @@
-use ssh2::Session;
+use ssh2::{Session, Sftp};
 use std::fs::{self, File};
 use std::io::{self, Read, Write};
 use std::net::TcpStream;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{mpsc::Sender, Arc};
 use std::time::{Duration, Instant};
@@ -178,6 +178,9 @@ pub fn upload_file_with_sftp(
 
     let sftp = session.sftp()?;
 
+    let remote_dir = Path::new(remote_path).parent().unwrap();
+    create_remote_directory(&sftp, remote_dir)?;
+
     let mut remote_file = sftp.create(&Path::new(remote_path))?;
 
     let mut buffer = vec![0u8; BUFFER_SIZE];
@@ -217,6 +220,43 @@ pub fn upload_file_with_sftp(
         }
     }
 
-    sender.send(("done", None)).unwrap();
+    Ok(())
+}
+
+/// Creates a remote directory and any necessary parent directories on an SFTP server.
+///
+/// This function takes an `Sftp` session and a `Path` representing the remote directory to create.
+/// It iterates through the components of the given `remote_dir` path and ensures that each component
+/// (directory) exists by attempting to open it. If a component does not exist, it creates the directory
+/// with the specified permissions (default: 0o777).
+///
+/// # Arguments
+///
+/// * `sftp` - A reference to an `Sftp` session, which represents the SFTP connection.
+/// * `remote_dir` - A reference to a `Path` representing the remote directory to create.
+///
+/// # Returns
+///
+/// This function returns an `io::Result<()>`, which is:
+/// * `Ok(())` if the directory (and any necessary parent directories) were successfully created or already exist.
+/// * `Err(e)` if there was an error creating the directories.
+///
+/// # Errors
+///
+/// This function will return an error if any of the following operations fail:
+/// * Attempting to open a directory using `sftp.opendir`.
+/// * Creating a directory using `sftp.mkdir`.
+/// ```
+fn create_remote_directory(sftp: &Sftp, remote_dir: &Path) -> io::Result<()> {
+    let mut path = PathBuf::new();
+
+    for component in remote_dir.components() {
+        path.push(component);
+
+        if let Err(_) = sftp.opendir(&path) {
+            sftp.mkdir(&path, 0o777)?;
+        }
+    }
+
     Ok(())
 }

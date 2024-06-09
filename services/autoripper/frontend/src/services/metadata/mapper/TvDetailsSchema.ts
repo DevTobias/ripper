@@ -41,5 +41,9 @@ export const TvDetailsSchema = z.object({
   number_of_episodes: z.number(),
   number_of_seasons: z.number(),
   last_episode_to_air: EpisodeSchema,
+  external_ids: z.object({
+    imdb_id: z.string(),
+    tvdb_id: z.number(),
+  }),
   seasons: z.array(TvSeasonSchema),
 });

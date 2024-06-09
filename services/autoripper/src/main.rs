@@ -102,19 +102,6 @@ async fn main() {
         .route("/quality-profiles", get(handler::get_quality_profile_handler))
         .route("/root-folders", get(handler::get_root_folder_handler));
 
-    // state.radarr_client.create_movie(746036, "The Fall Guy", 4, "/data/media/movies").await.ok();
-    // state.radarr_client.scan_rename_movie(113).await.ok();
-
-    // state.jellyfin_client.library_scan().await.ok();
-
-    // state
-    //     .sonarr_client
-    //     .create_tv_show(371572, "House of the Dragon", "standard", 4, "/data/media/tv")
-    //     .await
-    //     .ok();
-    // Create Season 01 folder -> Upload [Bluray-1080p]_S01E02 Sample 1920x1080.mkv files
-    // state.sonarr_client.scan_rename_tv_show(91).await.ok();
-
     let app = Router::new()
         .nest_service("/", ServeDir::new("./frontend/dist"))
         .nest("/api/tmdb", metadata_routes)

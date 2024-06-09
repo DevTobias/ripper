@@ -14,6 +14,15 @@ interface Props {
 }
 
 export const SeasonSelection: FC<Props> = ({ form, seasonNumbers, isLoading }) => {
+  if (!seasonNumbers || isLoading)
+    return (
+      <div className='flex h-[80px] flex-wrap gap-1 overflow-y-auto'>
+        {repeat(5).map((id) => (
+          <LoadingSelectionButton key={id} />
+        ))}
+      </div>
+    );
+
   return (
     <FormField
       control={form.control}
@@ -22,7 +31,7 @@ export const SeasonSelection: FC<Props> = ({ form, seasonNumbers, isLoading }) =
         <FormItem>
           <FormControl>
             <div className='flex h-[80px] flex-wrap gap-1 overflow-y-auto'>
-              {seasonNumbers?.map((season) => (
+              {seasonNumbers.map((season) => (
                 <Button
                   key={season}
                   className='aspect-square size-9 min-w-0 p-0'
@@ -33,7 +42,6 @@ export const SeasonSelection: FC<Props> = ({ form, seasonNumbers, isLoading }) =
                   S{season}
                 </Button>
               ))}
-              {isLoading && repeat(5).map((id) => <LoadingSelectionButton key={id} />)}
             </div>
           </FormControl>
         </FormItem>

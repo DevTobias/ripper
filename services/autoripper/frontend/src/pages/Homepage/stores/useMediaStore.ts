@@ -11,6 +11,7 @@ export const metadataFormSchema = z
     selectedEpisodes: z.array(z.number()),
     qualityProfile: z.string().min(1, { message: 'formErrors.required' }),
     rootFolder: z.string().min(1, { message: 'formErrors.required' }),
+    seriesType: z.enum(['standard', 'anime']),
     selectedMedia: z.object(
       {
         id: z.number(),
@@ -43,6 +44,7 @@ export type ProgressPayload = {
 
 type State = {
   metadata: MetadataFormValues | null;
+  selectedTvId: number | null;
   selectedTitles: string[];
   rippingInProgress: boolean;
   rippingProgress: ProgressPayload;
@@ -55,6 +57,7 @@ type Actions = {
 
 const defaultState: State = {
   metadata: null,
+  selectedTvId: null,
   selectedTitles: [],
   rippingInProgress: false,
   rippingProgress: { progress: 0, step: 0, eta: 0, label: '', progressState: 'idle' },

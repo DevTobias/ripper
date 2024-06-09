@@ -28,6 +28,7 @@ export const ProcessProgress = () => {
   const rippingProgress = useMediaStore(useShallow((state) => state.rippingProgress));
   const metadata = useMediaStore(useShallow((state) => state.metadata));
   const selectedTitles = useMediaStore(useShallow((state) => state.selectedTitles));
+  const selectedTvId = useMediaStore(useShallow((state) => state.selectedTvId));
 
   const handleWebsocketMessage = (message: WebsocketMessage) => {
     if (message.type === 'ripping_progress' || message.type === 'encoding_progress' || message.type === 'upload_progress') {
@@ -74,8 +75,14 @@ export const ProcessProgress = () => {
           rootFolder: metadata.rootFolder,
           metadata:
             metadata.type === 'movie'
-              ? { tmdb_id: metadata.selectedMedia.id }
-              : { tmdb_id: metadata.selectedMedia.id, season: metadata.selectedSeason, episodes: metadata.selectedEpisodes },
+              ? { tmdb_id: metadata.selectedMedia.id, title: metadata.selectedMedia.title }
+              : {
+                  tvdb_id: selectedTvId,
+                  title: metadata.selectedMedia.title,
+                  series_type: metadata.seriesType,
+                  season: metadata.selectedSeason,
+                  episodes: metadata.selectedEpisodes,
+                },
         })
       : '',
     { onMessage: (event) => handleWebsocketMessage(WebsocketMessageSchema.parse(JSON.parse(event.data as string))) },

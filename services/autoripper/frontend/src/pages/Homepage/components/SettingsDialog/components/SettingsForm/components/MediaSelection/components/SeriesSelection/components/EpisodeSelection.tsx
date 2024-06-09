@@ -15,6 +15,15 @@ interface Props {
 }
 
 export const EpisodeSelection: FC<Props> = ({ form, episodes, isLoading }) => {
+  if (!episodes || isLoading)
+    return (
+      <div className='flex h-[80px] flex-wrap gap-1 overflow-y-auto'>
+        {repeat(8).map((id) => (
+          <LoadingSelectionButton key={id} />
+        ))}
+      </div>
+    );
+
   return (
     <FormField
       control={form.control}
@@ -23,7 +32,7 @@ export const EpisodeSelection: FC<Props> = ({ form, episodes, isLoading }) => {
         <FormItem>
           <FormControl>
             <div className='flex h-[80px] flex-wrap gap-1 overflow-y-auto'>
-              {episodes?.map((episode) => {
+              {episodes.map((episode) => {
                 const isActive = field.value.includes(episode.episode_number);
 
                 return (
@@ -45,7 +54,6 @@ export const EpisodeSelection: FC<Props> = ({ form, episodes, isLoading }) => {
                   </Button>
                 );
               })}
-              {isLoading && repeat(8).map((id) => <LoadingSelectionButton key={id} />)}
             </div>
           </FormControl>
         </FormItem>

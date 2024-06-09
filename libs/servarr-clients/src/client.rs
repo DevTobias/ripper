@@ -191,7 +191,7 @@ impl ServarrClient {
         let mut completed_counter = 0;
 
         while !self.has_command_completed(command_id).await? {
-            tokio::time::sleep(std::time::Duration::from_secs(1)).await;
+            tokio::time::sleep(std::time::Duration::from_secs(2)).await;
             completed_counter += 1;
             if completed_counter > 10 {
                 anyhow::bail!("Command did not complete in time")

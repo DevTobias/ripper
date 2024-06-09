@@ -155,7 +155,8 @@ impl TmdbClient {
     ///
     /// Returns an error if URL construction fails, the request fails, or if fetching season details fails.
     pub async fn get_tv_series(&self, id: u32, lang: &str) -> Result<TvSeries> {
-        let url = Url::parse_with_params(&format!("{}/tv/{}", TMDB_BASE_URL, id), &[("language", lang)]).context("could not parse URL")?;
+        let url = Url::parse_with_params(&format!("{}/tv/{}", TMDB_BASE_URL, id), &[("language", lang), ("append_to_response", "external_ids")])
+            .context("could not parse URL")?;
 
         info!("Fetching tv series with id: {}", id);
         let mut response = self.tmdb_request::<TvSeries>(url.as_str()).await?;

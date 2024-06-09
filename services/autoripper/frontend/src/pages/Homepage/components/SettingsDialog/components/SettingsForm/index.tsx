@@ -25,7 +25,7 @@ export const SettingsForm: FC<Props> = ({ children, onSubmit }) => {
 
   const form = useForm<z.infer<typeof metadataFormSchema>>({
     resolver: zodResolver(metadataFormSchema),
-    defaultValues: { type: 'movie', selectedSeason: 1, selectedEpisodes: [] },
+    defaultValues: { type: 'movie', selectedSeason: 1, selectedEpisodes: [], seriesType: 'standard' },
   });
 
   const onSubmitHandler = (values: MetadataFormValues) => {

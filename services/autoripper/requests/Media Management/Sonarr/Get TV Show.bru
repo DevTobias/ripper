@@ -1,0 +1,35 @@
+meta {
+  name: Get TV Show
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{sonarr_base_url}}/series?tvdbId=267440
+  body: json
+  auth: none
+}
+
+query {
+  tvdbId: 267440
+}
+
+headers {
+  X-Api-Key: {{sonarr_api_key}}
+}
+
+body:json {
+  {
+    "title": "House of the Dragon",
+    "tvdbId": 371572,
+    "qualityProfileId": 4,
+    "rootFolderPath": "/data/media/tv",
+    "seriesType": "standard",
+    "tags": [10],
+    "seasonFolder": true,
+    "monitored": true,
+    "addOptions": {
+      "monitor": "all"
+    }
+  }
+}
