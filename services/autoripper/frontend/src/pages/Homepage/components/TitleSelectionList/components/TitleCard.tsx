@@ -22,7 +22,7 @@ export const TitleCard: FC<Props> = ({ title }) => {
       </span>
       <div className='flex flex-col gap-1'>
         <span className='flex max-h-[48px] flex-wrap gap-1 overflow-y-hidden'>
-          <Badge variant='secondary'>{t('homepage.titleSelection.chapters', { amount: title.chapterCount })}</Badge>
+          <Badge variant='secondary'>{t('titleSelection.chapters', { amount: title.chapterCount })}</Badge>
           <Badge variant='secondary'>{(title.duration / 60).toFixed(0)}min</Badge>
           <Badge variant='secondary'>{title.diskSize}</Badge>
           {[...new Set(title.audioStreams.map((audio) => audio.langName))].map((lang) => (

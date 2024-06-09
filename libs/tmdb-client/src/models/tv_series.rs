@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 #[derive(Deserialize, Serialize, Debug)]
 pub struct TvSeries {
     pub id: u32,
-    pub original_name: String,
+    pub name: String,
     pub overview: String,
     pub homepage: String,
     pub popularity: f32,

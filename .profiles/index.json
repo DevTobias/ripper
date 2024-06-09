@@ -1,14 +1,14 @@
 [
   {
-    "id": "h264_1080p_22crf_live_action_medium",
-    "label": "Live Action 1080p - Fast",
-    "file_name": "profiles/h264_1080p_medium_22crf_opus_5.1_384kbps.json",
-    "preset_name": "H264 (Movies)"
-  },
-  {
     "id": "h264_1080p_20crf_live_action_veryslow",
     "label": "Live Action 1080p - Quality",
     "file_name": "profiles/h264_veryslow_20_opus.json",
     "preset_name": "h264_veryslow_20_opus"
+  },
+  {
+    "id": "h264_1080p_22crf_live_action_medium",
+    "label": "Live Action 1080p - Fast",
+    "file_name": "profiles/h264_1080p_medium_22crf_opus_5.1_384kbps.json",
+    "preset_name": "H264 (Movies)"
   }
 ]

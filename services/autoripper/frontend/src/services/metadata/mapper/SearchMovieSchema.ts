@@ -9,7 +9,6 @@ export const SearchMovieSchema = z
       z.object({
         id: z.number(),
         title: z.string(),
-        original_language: z.string(),
         overview: z.string(),
         popularity: z.number(),
         release_date: z.string(),
@@ -25,7 +24,6 @@ export const SearchMovieSchema = z
       title: result.title,
       description: result.overview,
       popularity: result.popularity,
-      originalLanguage: result.original_language,
       posterPath: result.poster_path,
       voteAverage: result.vote_average,
       releaseDate: new Date(result.release_date),

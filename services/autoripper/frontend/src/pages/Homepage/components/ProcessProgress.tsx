@@ -26,9 +26,19 @@ type WebsocketMessage = z.infer<typeof WebsocketMessageSchema>;
 export const ProcessProgress = () => {
   const rippingInProgress = useMediaStore(useShallow((state) => state.rippingInProgress));
   const rippingProgress = useMediaStore(useShallow((state) => state.rippingProgress));
-  const metadata = useMediaStore(useShallow((state) => state.metadata));
   const selectedTitles = useMediaStore(useShallow((state) => state.selectedTitles));
-  const selectedTvId = useMediaStore(useShallow((state) => state.selectedTvId));
+
+  const mediaType = useMediaStore(useShallow((state) => state.mediaType));
+
+  const movieSelectionValues = useMediaStore(useShallow((state) => state.movieSelectionValues));
+  const tvShowSelectionValues = useMediaStore(useShallow((state) => state.tvShowSelectionValues));
+
+  const selectedMovie = useMediaStore(useShallow((state) => state.selectedMovie));
+  const selectedTvShow = useMediaStore(useShallow((state) => state.selectedTvShow));
+
+  const metadataExists =
+    (mediaType === 'movie' && selectedMovie && movieSelectionValues) ||
+    (mediaType === 'tv_show' && selectedTvShow && tvShowSelectionValues);
 
   const handleWebsocketMessage = (message: WebsocketMessage) => {
     if (message.type === 'ripping_progress' || message.type === 'encoding_progress' || message.type === 'upload_progress') {
@@ -57,36 +67,54 @@ export const ProcessProgress = () => {
     if (message.type === 'uploading_done') {
       useMediaStore.setState({
         selectedTitles: [],
-        metadata: null,
+        selectedMovie: null,
+        selectedTvShow: null,
+        movieSelectionValues: null,
+        tvShowSelectionValues: null,
         rippingInProgress: false,
         rippingProgress: { progress: 0, step: 0, eta: 0, label: '', progressState: 'idle' },
       });
     }
   };
 
+  const getWebsocketEndpoint = () => {
+    if (mediaType === 'movie') {
+      return endpointFactory.ripWebsocket({
+        mediaType: 'movie',
+        titles: selectedTitles,
+        device: movieSelectionValues!.device,
+        profile: movieSelectionValues!.encodingProfile,
+        qualityProfile: movieSelectionValues!.qualityProfile,
+        rootFolder: movieSelectionValues!.rootFolder,
+        metadata: { tmdb_id: selectedMovie!.id, title: selectedMovie!.title },
+      });
+    }
+
+    if (mediaType === 'tv_show') {
+      return endpointFactory.ripWebsocket({
+        mediaType: 'tv_show',
+        titles: selectedTitles,
+        device: tvShowSelectionValues!.device,
+        profile: tvShowSelectionValues!.encodingProfile,
+        qualityProfile: tvShowSelectionValues!.qualityProfile,
+        rootFolder: tvShowSelectionValues!.rootFolder,
+        metadata: {
+          tvdb_id: selectedTvShow!.external_ids.tvdbId,
+          title: selectedTvShow!.title,
+          series_type: tvShowSelectionValues!.seriesType,
+          season: tvShowSelectionValues!.selectedSeason,
+          episodes: tvShowSelectionValues!.selectedEpisodes,
+        },
+      });
+    }
+
+    return '';
+  };
+
   const { sendMessage } = useWebSocket(
-    metadata
-      ? endpointFactory.ripWebsocket({
-          titles: selectedTitles,
-          device: metadata.device,
-          profile: metadata.profile,
-          mediaType: metadata.type,
-          qualityProfile: metadata.qualityProfile,
-          rootFolder: metadata.rootFolder,
-          metadata:
-            metadata.type === 'movie'
-              ? { tmdb_id: metadata.selectedMedia.id, title: metadata.selectedMedia.title }
-              : {
-                  tvdb_id: selectedTvId,
-                  title: metadata.selectedMedia.title,
-                  series_type: metadata.seriesType,
-                  season: metadata.selectedSeason,
-                  episodes: metadata.selectedEpisodes,
-                },
-        })
-      : '',
+    getWebsocketEndpoint(),
     { onMessage: (event) => handleWebsocketMessage(WebsocketMessageSchema.parse(JSON.parse(event.data as string))) },
-    rippingInProgress && !!metadata && selectedTitles.length > 0
+    rippingInProgress && !!metadataExists && selectedTitles.length > 0
   );
 
   useEffect(() => {
@@ -130,9 +158,9 @@ export const ProcessProgress = () => {
           {getCurrentProgress('any') > 0 && (
             <div className='flex flex-wrap justify-center gap-1'>
               <Badge variant='secondary' className='w-fit px-[7px]'>
-                {getCurrentProgress('any').toFixed(2)}%
+                {getCurrentProgress('any').toFixed(1)}%
               </Badge>
-              {metadata?.type === 'tv_show' && (
+              {mediaType === 'tv_show' && (
                 <Badge variant='secondary' className='w-fit px-[7px]'>
                   {rippingProgress.step + 1}/{selectedTitles.length}
                 </Badge>

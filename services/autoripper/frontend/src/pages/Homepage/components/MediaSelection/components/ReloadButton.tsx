@@ -7,28 +7,32 @@ import { Button } from '$/components/common/ui/button';
 import { cn } from '$/lib/utils';
 import { useMediaStore } from '$/pages/Homepage/stores/useMediaStore';
 import { devicesQuery } from '$/services/devices';
+import { qualityProfileQuery, rootFoldersQuery } from '$/services/management';
 import { encodingPresetsQuery } from '$/services/presets';
 
-import type { MetadataFormControl } from '$/pages/Homepage/components/SettingsDialog/components/SettingsForm';
-
 interface Props {
-  form: MetadataFormControl;
+  onReload: () => void;
+  type: 'movie' | 'tv_show';
 }
 
-export const ReloadButton: FC<Props> = ({ form }) => {
+export const ReloadButton: FC<Props> = ({ type, onReload }) => {
   const rippingInProgress = useMediaStore(useShallow((state) => state.rippingInProgress));
 
   const devices = useQuery(devicesQuery);
-  const presets = useQuery(encodingPresetsQuery);
+  const encodingProfiles = useQuery(encodingPresetsQuery);
+  const qualityProfiles = useQuery(qualityProfileQuery({ media_type: type }));
+  const rootFolders = useQuery(rootFoldersQuery({ media_type: type }));
 
   const reloadDevices = () => {
-    form.resetField('device');
-    form.resetField('profile');
-    void presets.refetch();
+    onReload();
+    void encodingProfiles.refetch();
     void devices.refetch();
+    void qualityProfiles.refetch();
+    void rootFolders.refetch();
   };
 
-  const loading = devices.isLoading || devices.isRefetching || presets.isLoading || presets.isRefetching;
+  const loading =
+    encodingProfiles.isLoading || devices.isRefetching || qualityProfiles.isLoading || rootFolders.isRefetching;
 
   return (
     <Button

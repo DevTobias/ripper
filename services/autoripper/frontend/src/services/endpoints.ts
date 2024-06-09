@@ -63,6 +63,10 @@ export const endpointFactory = {
     const params = new URLSearchParams(Object.entries({ lang }));
     return `${TV_SHOW_DETAILS_ENDPOINT}/${id}?${params.toString()}`;
   },
+  movieDetails: (id: number, lang: string) => {
+    const params = new URLSearchParams(Object.entries({ lang }));
+    return `${MOVIE_DETAILS_ENDPOINT}/${id}?${params.toString()}`;
+  },
   movieDiscProperties: (id: number, device: string, langs: string[]) => {
     const params = new URLSearchParams(Object.entries({ tmdb_id: id.toString(), device }));
     langs.forEach((lang) => params.append('langs', lang));

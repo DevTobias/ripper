@@ -40,7 +40,7 @@ use crate::Disc;
 /// ```
 pub async fn filter_movie_main_features(disc: Disc, langs: &[&str], tmdb_id: u32, client: &TmdbClient) -> Result<Disc> {
     let movie = client.get_movie(tmdb_id, langs[0]).await.context("failed to fetch movie details")?;
-    let actual_runtime = (movie.runtime * 60) as f32;
+    let actual_runtime = (movie.runtime.unwrap_or(0) * 60) as f32;
 
     let mut filtered_disc = disc.clone();
     filtered_disc.titles = disc

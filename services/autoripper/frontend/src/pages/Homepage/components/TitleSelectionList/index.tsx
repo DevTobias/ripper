@@ -20,26 +20,36 @@ export const TitleSelectionList = () => {
   const { t } = useTranslation();
 
   const rippingInProgress = useMediaStore(useShallow((state) => state.rippingInProgress));
-  const metadata = useMediaStore(useShallow((state) => state.metadata));
+  const mediaType = useMediaStore(useShallow((state) => state.mediaType));
+
+  const movieSelectionValues = useMediaStore(useShallow((state) => state.movieSelectionValues));
+  const tvShowSelectionValues = useMediaStore(useShallow((state) => state.tvShowSelectionValues));
+
+  const selectedMovie = useMediaStore(useShallow((state) => state.selectedMovie));
+  const selectedTvShow = useMediaStore(useShallow((state) => state.selectedTvShow));
 
   const [isLoading, setIsLoading] = useState(false);
   const [items, setItems] = useState<Title[]>([]);
 
+  const metadataExists =
+    (mediaType === 'movie' && selectedMovie && movieSelectionValues) ||
+    (mediaType === 'tv_show' && selectedTvShow && tvShowSelectionValues);
+
   const loadItems = async () => {
-    if (!metadata) return;
+    if (!metadataExists) return;
 
     setIsLoading(true);
     setItems([]);
 
-    if (metadata.type === 'tv_show') {
+    if (mediaType === 'tv_show') {
       const data = await queryClient
         .ensureQueryData(
           tvShowDiscPropertiesQuery({
             langs: ['deu'],
-            id: metadata.selectedMedia.id,
-            device: metadata.device,
-            episodes: metadata.selectedEpisodes,
-            season: metadata.selectedSeason,
+            id: selectedTvShow!.id,
+            device: tvShowSelectionValues!.device,
+            episodes: tvShowSelectionValues!.selectedEpisodes,
+            season: tvShowSelectionValues!.selectedSeason,
           })
         )
         .finally(() => setIsLoading(false));
@@ -47,13 +57,13 @@ export const TitleSelectionList = () => {
       setItems(data.titles);
     }
 
-    if (metadata.type === 'movie') {
+    if (mediaType === 'movie') {
       const data = await queryClient
         .ensureQueryData(
           movieDiscPropertiesQuery({
             langs: ['deu'],
-            id: metadata.selectedMedia.id,
-            device: metadata.device,
+            id: selectedMovie!.id,
+            device: movieSelectionValues!.device,
           })
         )
         .finally(() => setIsLoading(false));
@@ -64,7 +74,10 @@ export const TitleSelectionList = () => {
 
   useEffect(() => {
     return useMediaStore.subscribe((curr, prev) => {
-      if (curr.metadata !== prev.metadata) {
+      if (
+        curr.movieSelectionValues !== prev.movieSelectionValues ||
+        curr.tvShowSelectionValues !== prev.tvShowSelectionValues
+      ) {
         setItems([]);
       }
     });
@@ -94,14 +107,18 @@ export const TitleSelectionList = () => {
   };
 
   const savingEnabled =
-    (metadata?.type === 'movie' && items.length === 1) ||
-    (metadata?.type === 'tv_show' && items.length === metadata.selectedEpisodes.length);
+    (mediaType === 'movie' && items.length === 1) ||
+    (mediaType === 'tv_show' && items.length === tvShowSelectionValues?.selectedEpisodes.length);
 
   return (
     <div className='flex w-full flex-col gap-2 '>
       <div className='flex w-full gap-2'>
-        <Button className='flex w-full gap-2' disabled={isLoading || !metadata || rippingInProgress} onClick={loadItems}>
-          <span>{t('homepage.titleSelection.scanDisc')}</span>
+        <Button
+          className='flex w-full gap-2'
+          disabled={isLoading || !metadataExists || rippingInProgress}
+          onClick={loadItems}
+        >
+          <span>{t('titleSelection.scanDisc')}</span>
           {isLoading && <Loader className='size-4 animate-spin' />}
         </Button>
 
@@ -123,10 +140,7 @@ export const TitleSelectionList = () => {
               <Info className='size-4 text-slate-500' />
             </Button>
           </PopoverTrigger>
-          <PopoverContent
-            className='w-96 text-sm'
-            dangerouslySetInnerHTML={{ __html: t('homepage.titleSelection.description') }}
-          />
+          <PopoverContent className='w-96 text-sm' dangerouslySetInnerHTML={{ __html: t('titleSelection.description') }} />
         </Popover>
       </div>
       {items.length === 0 && repeat(2).map((i) => <LoadingTitleCard key={i} id={i + 2} />)}
