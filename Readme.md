@@ -21,7 +21,7 @@ mkdir ~/autoripper
 scp services/autoripper/config.json devtobias@192.168.178.69:~/autoripper
 scp services/autoripper/frontend/.env.local devtobias@192.168.178.69:~/ripper/services/autoripper/frontend
 
-mv ../../target/release/ripper ~/autoripper/
+mv -f ../../target/release/ripper ~/autoripper/
 
 sudo apt install nodejs
 sudo apt install npm
@@ -31,7 +31,7 @@ npm install
 npm run build
 
 mkdir ~/autoripper/frontend
-mv dist ~/autoripper/frontend/dist
+mv -f dist ~/autoripper/frontend/dist
 cd ~/autoripper
 
 

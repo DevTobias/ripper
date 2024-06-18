@@ -9,9 +9,10 @@ use futures::{sink::SinkExt, stream::StreamExt};
 use serde::Deserialize;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{mpsc, Arc};
+use std::time::Duration;
 use std::{path::Path, thread};
-use tokio::fs;
 use tokio::sync::Mutex;
+use tokio::{fs, time};
 use tracing::{error, info};
 use utils::{upload_file_with_sftp, UploadProgressPayload};
 
@@ -260,6 +261,7 @@ impl RippingHandler {
         let remote_host = self.state.remote_host.clone();
         let remote_user = self.state.remote_user.clone();
         let remote_password = self.state.remote_password.clone();
+        let remove_output_dir = self.state.output_dir.clone();
 
         let upload_handle = tokio::spawn(async move {
             if media_type == "movie" {
@@ -312,7 +314,10 @@ impl RippingHandler {
             }
 
             jellyfin_client.library_scan().await.ok();
+            fs::remove_dir_all(Path::new(&remove_output_dir)).await.ok();
+
             upload_sender.send(("done", None)).unwrap();
+            time::sleep(Duration::from_secs(10)).await;
         });
 
         let receiver_handle = tokio::spawn(async move {
