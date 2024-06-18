@@ -1,9 +1,10 @@
 [Unit]
-Description=My Background Process
+Description=Background Process to rip Discs
 After=network.target
 
 [Service]
 ExecStart=/home/devtobias/autoripper/ripper
+WorkingDirectory=/home/devtobias/autoripper
 Type=simple
 Restart=always
 
