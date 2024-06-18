@@ -1,0 +1,11 @@
+[Unit]
+Description=My Background Process
+After=network.target
+
+[Service]
+ExecStart=/home/devtobias/autoripper/ripper
+Type=simple
+Restart=always
+
+[Install]
+WantedBy=default.target

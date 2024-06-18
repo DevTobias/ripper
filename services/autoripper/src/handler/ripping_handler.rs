@@ -314,7 +314,9 @@ impl RippingHandler {
             }
 
             jellyfin_client.library_scan().await.ok();
+
             fs::remove_dir_all(Path::new(&remove_output_dir)).await.ok();
+            fs::create_dir_all(Path::new(&remove_output_dir)).await.ok();
 
             upload_sender.send(("done", None)).unwrap();
             time::sleep(Duration::from_secs(10)).await;
