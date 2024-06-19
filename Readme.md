@@ -37,6 +37,12 @@ cd ~/autoripper
 
 mkdir output
 mkdir profiles
+
+
+sudo mv services/autoripper/deployment/autorip.service /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl start autorip
+sudo systemctl enable autorip
 ```
 
 ## Install MakeMKV
