@@ -176,7 +176,8 @@ pub fn read_disc_properties(command: &str, device: &str, makemkv_mutex: &Arc<Mut
     let mut subtitle_stream_id: isize = -1;
 
     for line in stdout.lines() {
-        let columns = parse_csv_line(&line.context("failed to read line")?);
+        let line = line.context("failed to read line")?;
+        let columns = parse_csv_line(&line);
 
         match columns.get(0).map(|s| s.as_str()) {
             Some(x) if x.starts_with(CINFO_PREFIX) => handle_cinfo(&mut disc, x, &columns).context("failed to handle cinfo")?,

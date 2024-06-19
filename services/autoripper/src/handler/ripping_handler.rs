@@ -9,10 +9,9 @@ use futures::{sink::SinkExt, stream::StreamExt};
 use serde::Deserialize;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{mpsc, Arc};
-use std::time::Duration;
 use std::{path::Path, thread};
+use tokio::fs;
 use tokio::sync::Mutex;
-use tokio::{fs, time};
 use tracing::{error, info};
 use utils::{upload_file_with_sftp, UploadProgressPayload};
 
@@ -150,17 +149,14 @@ impl RippingHandler {
         });
 
         while let Ok((event_type, payload)) = rip_receiver.recv() {
-            if payload.is_none() {
-                continue;
-            }
-
-            let payload = payload.unwrap();
-
             let message = match event_type {
-                "progress" => format!(
-                    r#"{{ "type": "ripping_progress", "payload": {{ "label": "{}", "progress": {}, "step": {}, "eta": {} }} }}"#,
-                    payload.step_details, payload.progress, payload.step, payload.eta
-                ),
+                "progress" => {
+                    let payload = payload.unwrap();
+                    format!(
+                        r#"{{ "type": "ripping_progress", "payload": {{ "label": "{}", "progress": {}, "step": {}, "eta": {} }} }}"#,
+                        payload.step_details, payload.progress, payload.step, payload.eta
+                    )
+                }
                 "done" => r#"{"type": "ripping_done"}"#.to_string(),
                 _ => continue,
             };
@@ -203,17 +199,14 @@ impl RippingHandler {
         });
 
         while let Ok((event_type, payload)) = encoding_receiver.recv() {
-            if payload.is_none() {
-                continue;
-            }
-
-            let payload = payload.unwrap();
-
             let message = match event_type {
-                "progress" => format!(
-                    r#"{{ "type": "encoding_progress", "payload": {{ "label": "{}", "progress": {}, "step": {}, "eta": {} }} }}"#,
-                    "Encoding", payload.progress, payload.step, payload.eta
-                ),
+                "progress" => {
+                    let payload = payload.unwrap();
+                    format!(
+                        r#"{{ "type": "encoding_progress", "payload": {{ "label": "{}", "progress": {}, "step": {}, "eta": {} }} }}"#,
+                        "Encoding", payload.progress, payload.step, payload.eta
+                    )
+                }
                 "done" => r#"{"type": "encoding_done"}"#.to_string(),
                 _ => continue,
             };
@@ -319,22 +312,23 @@ impl RippingHandler {
             fs::create_dir_all(Path::new(&remove_output_dir)).await.ok();
 
             upload_sender.send(("done", None)).unwrap();
-            time::sleep(Duration::from_secs(10)).await;
         });
 
         let receiver_handle = tokio::spawn(async move {
-            while let Ok((event_type, payload)) = upload_receiver.recv() {
-                if payload.is_none() {
-                    continue;
-                }
-
-                let payload = payload.unwrap();
+            loop {
+                let (event_type, payload) = match upload_receiver.recv() {
+                    Ok((event_type, payload)) => (event_type, payload),
+                    Err(_) => continue,
+                };
 
                 let message = match event_type {
-                    "progress" => format!(
-                        r#"{{ "type": "upload_progress", "payload": {{ "label": "{}", "progress": {}, "step": {}, "eta": {} }} }}"#,
-                        "Uploading", payload.progress, payload.step, payload.eta
-                    ),
+                    "progress" => {
+                        let payload = payload.unwrap();
+                        format!(
+                            r#"{{ "type": "upload_progress", "payload": {{ "label": "{}", "progress": {}, "step": {}, "eta": {} }} }}"#,
+                            "Uploading", payload.progress, payload.step, payload.eta
+                        )
+                    }
                     "done" => r#"{"type": "uploading_done"}"#.to_string(),
                     _ => continue,
                 };
@@ -342,6 +336,10 @@ impl RippingHandler {
                 let mut socket_sender_guard = socket_sender.lock().await;
                 if let Err(e) = socket_sender_guard.send(Message::Text(message)).await {
                     error!("Failed to send WebSocket message: {:?}", e);
+                    break;
+                }
+
+                if event_type == "done" {
                     break;
                 }
             }

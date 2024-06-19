@@ -3,7 +3,7 @@ use tracing::debug;
 
 use tmdb_client::TmdbClient;
 
-use crate::Disc;
+use crate::{Disc, Title};
 
 /// Filters the movie candidates on a disc based on audio language and runtime criteria.
 ///
@@ -42,27 +42,34 @@ pub async fn filter_movie_main_features(disc: Disc, langs: &[&str], tmdb_id: u32
     let movie = client.get_movie(tmdb_id, langs[0]).await.context("failed to fetch movie details")?;
     let actual_runtime = (movie.runtime.unwrap_or(0) * 60) as f32;
 
+    fn filter_titles(disc: &Disc, langs: &[&str], actual_runtime: f32, threshold: f32) -> Vec<Title> {
+        disc.titles
+            .iter()
+            .filter(|title| {
+                if title.audio_streams.is_empty() {
+                    debug!("skipping title {} because it has no audio streams", title.id);
+                    return false;
+                }
+
+                let satisfies_language = title.audio_streams.iter().any(|stream| langs.contains(&stream.lang_code.as_str()));
+
+                if !satisfies_language {
+                    debug!("skipping title {} because it does not satisfy language requirements", title.id);
+                    return false;
+                }
+
+                (title.duration as f32 >= actual_runtime * (1. - threshold)) && (title.duration as f32 <= actual_runtime * (1. + threshold))
+            })
+            .map(|title| title.to_owned())
+            .collect()
+    }
+
     let mut filtered_disc = disc.clone();
-    filtered_disc.titles = disc
-        .titles
-        .iter()
-        .filter(|title| {
-            if title.audio_streams.is_empty() {
-                debug!("skipping title {} because it has no audio streams", title.id);
-                return false;
-            }
+    filtered_disc.titles = filter_titles(&disc, langs, actual_runtime, 0.15);
 
-            let satisfies_language = title.audio_streams.iter().any(|stream| langs.contains(&stream.lang_code.as_str()));
-
-            if !satisfies_language {
-                debug!("skipping title {} because it does not satisfy language requirements", title.id);
-                return false;
-            }
-
-            (title.duration as f32 >= actual_runtime * 0.9) && (title.duration as f32 <= actual_runtime * 1.1)
-        })
-        .map(|title| title.to_owned())
-        .collect();
+    if filtered_disc.titles.is_empty() {
+        filtered_disc.titles = filter_titles(&disc, langs, actual_runtime, 0.5);
+    }
 
     Ok(filtered_disc)
 }
@@ -116,29 +123,36 @@ pub async fn filter_tv_series_main_features(disc: Disc, langs: &[&str], season: 
         .filter_map(|episode| if episodes.contains(&episode.episode_number) { Some((episode.runtime.unwrap_or(0) * 60) as f32) } else { None })
         .collect();
 
+    fn filter_titles(disc: &Disc, langs: &[&str], episode_runtimes: &[f32], threshold: f32) -> Vec<Title> {
+        disc.titles
+            .iter()
+            .filter(|title| {
+                if title.audio_streams.is_empty() {
+                    debug!("skipping title {} because it has no audio streams", title.id);
+                    return false;
+                }
+
+                let satisfies_language = title.audio_streams.iter().any(|stream| langs.contains(&stream.lang_code.as_str()));
+
+                if !satisfies_language {
+                    debug!("skipping title {} because it does not satisfy language requirements", title.id);
+                    return false;
+                }
+
+                episode_runtimes
+                    .iter()
+                    .any(|&runtime| (title.duration as f32 >= runtime * (1. - threshold)) && (title.duration as f32 <= runtime * (1. + threshold)))
+            })
+            .map(|title| title.to_owned())
+            .collect()
+    }
+
     let mut filtered_disc = disc.clone();
-    filtered_disc.titles = disc
-        .titles
-        .iter()
-        .filter(|title| {
-            if title.audio_streams.is_empty() {
-                debug!("skipping title {} because it has no audio streams", title.id);
-                return false;
-            }
+    filtered_disc.titles = filter_titles(&disc, langs, &episode_runtimes, 0.15);
 
-            let satisfies_language = title.audio_streams.iter().any(|stream| langs.contains(&stream.lang_code.as_str()));
-
-            if !satisfies_language {
-                debug!("skipping title {} because it does not satisfy language requirements", title.id);
-                return false;
-            }
-
-            episode_runtimes
-                .iter()
-                .any(|&runtime| (title.duration as f32 >= runtime * 0.9) && (title.duration as f32 <= runtime * 1.1))
-        })
-        .map(|title| title.to_owned())
-        .collect();
+    if filtered_disc.titles.is_empty() {
+        filtered_disc.titles = filter_titles(&disc, langs, &episode_runtimes, 0.5);
+    }
 
     Ok(filtered_disc)
 }
