@@ -16,19 +16,24 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Setup PNPM
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
       - name: Setup Node runtime
         uses: actions/setup-node@v4
         with:
-          cache: 'npm'
+          cache: 'pnpm'
           node-version: '20.x'
-          cache-dependency-path: 'services/autoripper/frontend/package-lock.json'
+          cache-dependency-path: 'services/autoripper/frontend/pnpm-lock.yaml'
 
       - name: Install dependencies
-        run: npm ci --ignore-scripts
+        run: pnpm install
         working-directory: services/autoripper/frontend
 
       - name: Build project
-        run: npm run build
+        run: pnpm build
         working-directory: services/autoripper/frontend
         env:
           VITE_BACKEND_BASE_URL: '/'
