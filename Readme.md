@@ -6,6 +6,8 @@
 
 👇 An automatism for using MakeMKV and Handbrake to backup your owned DVD or Blue-Ray Discs written purely in Rust 🦀
 
+![Demo](.github/images/demo.jpeg)
+
 ## ✨ Features
 
 - [x] 📀 **Automated Ripping**: Rip your DVDs and Blue-Rays with MakeMKV
