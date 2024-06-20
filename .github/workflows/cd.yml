@@ -1,0 +1,41 @@
+name: Static CD Pipeline
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'service/autoripper/frontend/**'
+    branches:
+      - 'main'
+
+jobs:
+  deploy:
+    name: Build and publish the static build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node runtime
+        uses: actions/setup-node@v4
+        with:
+          cache: 'npm'
+          node-version: '20.x'
+          cache-dependency-path: 'service/autoripper/frontend/package-lock.json'
+
+      - name: Install dependencies
+        run: npm ci --ignore-scripts
+        working-directory: service/autoripper/frontend
+
+      - name: Build project
+        run: npm run build
+        working-directory: service/autoripper/frontend
+        env:
+          VITE_BACKEND_BASE_URL: '/'
+          VITE_BACKEND_WEBSOCKET_BASE_URL: '/'
+
+      - name: Upload frontend artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend
+          path: service/autoripper/frontend/dist

@@ -9,7 +9,8 @@
   "explorer.fileNesting.enabled": true,
   "explorer.fileNesting.expand": false,
   "explorer.fileNesting.patterns": {
-    "Cargo.toml": "Cargo.lock,.gitignore,.editorconfig,rustfmt.toml,config.json",
+    "Readme.md": "LICENSE",
+    "Cargo.toml": "Cargo.lock,.gitignore,.editorconfig,rustfmt.toml,config.json,config.example.json",
     "package.json": ".env.dist,.prettierignore,.gitignore,.editorconfig,tsconfig.json,tsconfig.node.json,compose.yml,qodana.yaml,pnpm-lock.yaml,.eslintrc.cjs,.prettierrc.js",
     "vite.config.ts": "index.html,brunoApiCollection.json,tailwind.config.js,postcss.config.js,components.json,.env*",
     "main.tsx": "reset.d.ts,env.d.ts,vite-env.d.ts",

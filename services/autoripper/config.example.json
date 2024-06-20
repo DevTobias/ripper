@@ -1,0 +1,17 @@
+{
+  "makemkv_command": "makemkvcon",
+  "handbrake_command": "HandBrakeCLI",
+  "output_dir": "~/ripper-deployment/output",
+  "encoding_profiles_path": "~/ripper-deployment/profiles",
+  "tmdb_key": "",
+  "radarr_endpoint": "https://radarr.dev/api/v3",
+  "radarr_api_key": "",
+  "sonarr_endpoint": "https://sonarr.dev/api/v3",
+  "sonarr_api_key": "",
+  "jellyfin_endpoint": "https://jellyfin.dev",
+  "jellyfin_api_key": "",
+  "origin": "http://192.168.178.47:5173",
+  "remote_host": "",
+  "remote_user": "",
+  "remote_password": ""
+}
