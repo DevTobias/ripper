@@ -40,8 +40,11 @@ jobs:
           VITE_BACKEND_BASE_URL: '/'
           VITE_BACKEND_WEBSOCKET_BASE_URL: '/'
 
+      - name: Create tarball of dist
+        run: tar -czf frontend.tar.gz -C services/autoripper/frontend/dist .
+
       - name: Release
         uses: softprops/action-gh-release@v2
         if: startsWith(github.ref, 'refs/tags/')
         with:
-          files: services/autoripper/frontend/dist/
+          files: frontend.tar.gz
