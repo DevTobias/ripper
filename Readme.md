@@ -41,6 +41,8 @@ cd ~/ripper/
 cp -r .profiles/* ~/ripper-deployment/profiles/
 
 # Download the frontend from GitHub into the folder
+mkdir -p ~/autoripper/frontend/dist
+wget -c https://github.com/tobias-kaerst-software/autoripper/releases/download/v1.0.0/frontend.tar.gz -O - | tar -xz -C ~/autoripper/frontend/dist
 
 # (Optional) Enable the ripper to run as a service
 sudo mv ~/ripper/services/autoripper/deployment/autorip.service /etc/systemd/system/
