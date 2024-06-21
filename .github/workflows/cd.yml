@@ -3,10 +3,11 @@ name: Static CD Pipeline
 on:
   workflow_dispatch:
   push:
-    paths:
-      - 'services/autoripper/frontend/**'
-    branches:
-      - 'main'
+    tags:
+      - 'v*.*.*'
+
+permissions:
+  contents: write
 
 jobs:
   deploy:
@@ -39,8 +40,8 @@ jobs:
           VITE_BACKEND_BASE_URL: '/'
           VITE_BACKEND_WEBSOCKET_BASE_URL: '/'
 
-      - name: Upload frontend artifact
-        uses: actions/upload-artifact@v4
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/')
         with:
-          name: frontend
-          path: services/autoripper/frontend/dist
+          files: services/autoripper/frontend/dist/
